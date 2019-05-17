@@ -1,5 +1,5 @@
 main: main.cpp utils.hpp
-	g++ main.cpp -o main -fopenmp
+	g++ main.cpp -o main -fopenmp -std=c++11
 
 
 test: main
