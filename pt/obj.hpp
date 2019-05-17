@@ -10,7 +10,7 @@ struct Intersection{
     //相交结果
 
     V3 n; //法向量
-    int into = 0; 
+    bool into = false; 
     int id = -1;
 
 

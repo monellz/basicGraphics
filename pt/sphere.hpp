@@ -38,10 +38,10 @@ public:
         V3 x = r.pos(t);
         V3 n = (x - o).norm(); //法向量
         if (n.dot(r.d) < 0) {
-            res.into = 1;
+            res.into = true;
             res.n = n;
         } else {
-            res.into = 0;
+            res.into = false;
             res.n = -n;
         }
         res.id = id;
@@ -49,10 +49,10 @@ public:
 		
 		//纹理
 		V3 stdp = x - o;
-		if (stdp.x == 0 && stdp.y == 0) res.a = res.b = 0;
+		if (stdp[0] == 0 && stdp[1] == 0) res.a = res.b = 0;
 		else {
-			res.a = atan2(stdp.y,stdp.x) / (2 * PI);
-			res.b = asin(stdp.z) / (2 * PI);
+			res.a = atan2(stdp[1],stdp[0]) / (2 * PI);
+			res.b = asin(stdp[2]) / (2 * PI);
 		}	
 
         return t;

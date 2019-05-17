@@ -5,5 +5,8 @@ main: main.cpp utils.hpp
 test: main
 	./main 800 600 test 50
 
+run: main
+	./main 800 600 img 5000
+
 clear:
 	rm main

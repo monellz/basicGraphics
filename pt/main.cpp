@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "ray.hpp"
 #include "scene.hpp"
+#include "camera.hpp"
 
 Scene scene;
 
@@ -28,7 +29,7 @@ V3 radiance(const Ray&r, int dep,unsigned short *X){
 		//else return obj.material.c;
 	if(obj->material.refl==DIFF){
 		double r1=2*PI*erand48(X), r2=erand48(X), r2s=sqrt(r2);
-		V3 w=nl, u=((fabs(w.x)>.1?V3(0,1):V3(1))&w).norm(), v=w&u;
+		V3 w=nl, u=((fabs(w[0])>.1?V3(0,1):V3(1))&w).norm(), v=w&u;
 		V3 d = (u*cos(r1)*r2s + v*sin(r1)*r2s + w*sqrt(1-r2)).norm();
 		return obj->material.e + f.mult(radiance(Ray(x,d),dep,X));
 	}
@@ -56,14 +57,16 @@ V3 radiance(const Ray&r, int dep,unsigned short *X){
 int main(int argc, char*argv[])
 {
 	int w=atoi(argv[1]), h=atoi(argv[2]), samp=atoi(argv[4])/4;
+	std::string fn(argv[3]);
+	
 
 	Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
-	//Ray cam(V3(70,32,480), V3(-0.15,0.05,-1).norm());
 
 	double fr = 0.5; //basic
-	//double fr = 0.56;
 
-	V3 cx=V3(w*fr/h), cy=(cx&cam.d).norm()*.5, r, *c=new V3[w*h];
+	V3 cx=V3(w*fr/h), cy=(cx&cam.d).norm()* fr, r, *c=new V3[w*h];
+	//Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
+
 
 #pragma omp parallel for schedule(dynamic, 1) private(r)
 	for(int y=0;y<h;++y){
@@ -73,7 +76,7 @@ int main(int argc, char*argv[])
 				for(int sx=0;sx<2;++sx)
 				{
 					unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
-					r.x=r.y=r.z=0;
+					r[0]=r[1]=r[2]=0;
 					for(int s=0;s<samp;++s){
 						double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
 						double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
@@ -88,6 +91,6 @@ int main(int argc, char*argv[])
 	fprintf(f,"P6\n%d %d\n%d\n", w,h,255);
 	for(int y=h-1;y>=0;--y)
 		for(int x=w-1;x>=0;--x)
-			fprintf(f,"%c%c%c",output(c[y*w+x].x),output(c[y*w+x].y),output(c[y*w+x].z));
+			fprintf(f,"%c%c%c",toColor(c[y*w+x][0]),toColor(c[y*w+x][1]),toColor(c[y*w+x][2]));
 	return 0;
 }

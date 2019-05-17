@@ -25,10 +25,10 @@ public:
 
         //相交
         if (delta < 0) {
-            res.into = 1;
+            res.into = true;
             res.n = n.norm();
         } else {
-            res.into = 0;
+            res.into = false;
             res.n = -n.norm();
         }
         res.id = id;

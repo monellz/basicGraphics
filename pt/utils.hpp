@@ -13,6 +13,6 @@ inline double ran() {
     return double(rand()) / RAND_MAX;
 }
 
-inline int output(double x) {return int(.5+ 255 *pow(x<0?0:x>1?1:x,1/2.2));}
+inline int toColor(double x) {return int(.5+ 255 *pow(x<0?0:x>1?1:x,1/2.2));}
 
 #endif
