@@ -6,23 +6,25 @@
 
 Scene scene;
 
+const int DEPTH = 5; //basic
+//const int DEPTH = 2; //basic
+
 V3 radiance(const Ray&r, int dep,unsigned short *X){
-	double t;
 	Intersection res;
 	//if(!intersect(r,t,id))return V3();
 	//if(!intersect(r,t,res))return V3();
-	if(!scene.findNearest_naive(r,t,res))return V3();
+	if(!scene.findNearest_naive(r,res))return V3();
 	//Sphere&obj=scene[id];
 	Object* obj = scene.getObj(res.id);
 	//if (res.into == 0 && res.id == 7) cout << res.id << endl;
 
 	//V3 x=r.pos(t),n=(x-obj.o).norm(),f=obj.material.c,nl=n.dot(r.d)<0?into=1,n:-n;
-	V3 x=r.pos(t),nl = res.n,f=obj->material.color(res.a,res.b);
+	V3 x=r.pos(res.t),nl = res.n,f=obj->material.color(res.a,res.b);
 	//n 球心到交点
 	//nl 入射光对应法向量
 
 	double p=f.max();
-	if(++dep>5)
+	if(++dep> DEPTH)
 		if(erand48(X)<p) f/=p;
 		//if(erand48(X)<p) f = f;
 		else return obj->material.e;
@@ -60,7 +62,8 @@ int main(int argc, char*argv[])
 	std::string fn(argv[3]);
 	
 
-	Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
+	//Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
+	Ray cam(V3(30,32,280), V3(0.15,-0.05,-1).norm()); //basic
 
 	double fr = 0.5; //basic
 

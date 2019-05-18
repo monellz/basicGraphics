@@ -16,14 +16,15 @@ public:
 
         return 0;
     }
-    double intersect(const Ray&r, Intersection& res) override {
+    bool intersect(const Ray&r, Intersection& res) override {
         double delta = n.dot(r.d);
-        if (delta == 0) return 0; //平行光
+        if (delta == 0) return false; //平行光
 
         double t = (d - n.dot(r.o)) / delta;
-        if (t <= 0) return 0;
+        if (t <= 0) return false;
 
         //相交
+        res.t = t;
         if (delta < 0) {
             res.into = true;
             res.n = n.norm();
@@ -35,8 +36,22 @@ public:
         //纹理
         //TODO
 
+        /*
+        V3 dx = n.vertical();
+        V3 dy = n & dx;
+        dx = dx.norm() * 2;
+        dy = dy.norm() * 2;
+        V3 x = r.pos(t);
+        */
+        V3 dx = V3(1,0,0);
+        V3 dy = V3(0,1,0);
+        res.a = x.dot(dx) / 8;
+        res.b = x.dot(dy) / 8;
 
-        return t;
+        return true;
+    }
+    std::pair<V3, V3> aabb() const override {
+        return std::make_pair(V3(), V3());
     }
 };
 

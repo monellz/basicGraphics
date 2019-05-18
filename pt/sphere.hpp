@@ -27,14 +27,15 @@ public:
 	}
 
     //返回0 不相交
-	double intersect(const Ray&r, Intersection& res) override{
+	bool intersect(const Ray&r, Intersection& res) override{
 		V3 ro = o-r.o;
 		double b = r.d.dot(ro);
 		double d = b*b-ro.dot(ro)+rad*rad;
-		if (d<0) return 0;
+		if (d<0) return false;
 		else d=sqrt(d);
         double t = (b - d > EPS)? b-d : ((b + d) > EPS? b + d : 0);
-        if (t == 0) return 0;
+        if (t == 0) return false;
+		res.t = t;
         V3 x = r.pos(t);
         V3 n = (x - o).norm(); //法向量
         if (n.dot(r.d) < 0) {
@@ -48,15 +49,20 @@ public:
 
 		
 		//纹理
-		V3 stdp = x - o;
-		if (stdp[0] == 0 && stdp[1] == 0) res.a = res.b = 0;
-		else {
-			res.a = atan2(stdp[1],stdp[0]) / (2 * PI);
-			res.b = asin(stdp[2]) / (2 * PI);
-		}	
+		double p = acos(-n.dot(V3(0,0,1))); //z轴
+		double q = acos(min(max(n.dot(V3(1,0,0)) / sin(p), -1.0), 1.0));
+		double u = p / PI;
+		double v = q / 2 / PI;
+		if (n.dot(V3(0,1,0)) < 0) v = 1 - v;
+		res.a = u;
+		res.b = v;
 
-        return t;
+        return true;
 		//return b-d>EPS ? b-d : b+d>EPS? b+d : 0;
+	}
+
+	std::pair<V3, V3> aabb() const override {
+		return std::make_pair(o - rad, o + rad);
 	}
 };
 
