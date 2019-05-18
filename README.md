@@ -11,3 +11,6 @@
 - [ ] obj文件处理
 
 ## Photon Mapping
+
+- [ ] photon mapping tracer
+- [ ] 整合pm
