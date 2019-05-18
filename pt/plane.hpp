@@ -43,7 +43,7 @@ public:
         dy = dy.norm() * 2;
         V3 x = r.pos(t);
         */
-        V3 x = r.pot(t);
+        V3 x = r.pos(t);
         V3 dx = V3(1,0,0);
         V3 dy = V3(0,1,0);
         res.a = x.dot(dx) / 8;
