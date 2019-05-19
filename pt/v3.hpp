@@ -25,6 +25,8 @@ struct V3{
 	V3 operator-(const V3&a) const {return V3(x-a.x, y-a.y, z-a.z);}
 	V3 operator&(const V3&a) const {return V3(y*a.z-z*a.y, z*a.x-x*a.z, x*a.y-y*a.x);}
 	V3 operator*(const V3&a) const {return V3(x * a.x, y * a.y, z * a.z);}
+	V3 operator+(double p) const {return V3(x + p, y + p, z + p);}
+	V3 operator-(double p) const {return V3(x - p, y - p, z - p);}
 	V3 operator*(double p) const {return V3(x*p, y*p, z*p);}
 	V3 operator/(double p) const {return V3(x/p, y/p, z/p);}
 
@@ -32,6 +34,7 @@ struct V3{
 	bool operator!=(const V3&a) const {return x!=a.x || y!=a.y || z!=a.z;}
 	V3&operator+=(const V3&a) {return *this = *this + a;}
 	V3&operator-=(const V3&a) {return *this = *this - a;}
+	V3&operator+=(double p) {return *this = *this + p;}
 	V3&operator*=(double p) {return *this = *this * p;}
 	V3&operator/=(double p) {return *this = *this / p;}
     V3&operator&=(double p) {return *this = *this & p;}

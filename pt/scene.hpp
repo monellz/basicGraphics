@@ -29,7 +29,7 @@ public:
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
 
         
-        objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+81.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top 
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+81.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top 
 
         //-----------------------//
 
@@ -39,7 +39,7 @@ public:
         //new Sphere(6,16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, REFR),//Mirr 
 
 
-        objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas 
         //new Sphere(7,16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, SPEC),//Glas 
 
         //new Sphere(8,16.5,V3(20,60,100),       V3(),V3(.25,.25,.75), DIFF),//Glas 
@@ -48,8 +48,8 @@ public:
 
         
 
-        //objs.push_back(new Sphere(objs.size(),600, V3(50,681.6-.27,81.6),V3(12,12,12),  V3(), DIFF)); //Lite 
-        objs.push_back(new Sphere(objs.size(),600, V3(50,681.6-.5,101.6),V3(12,12,12),  V3(), DIFF)); //Lite 
+        objs.push_back(new Sphere(objs.size(),30, V3(50,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF)); //Lite 
+        //objs.push_back(new Sphere(objs.size(),30, V3(50,101.6-.5,101.6),V3(12,12,12),  V3(), DIFF)); //Lite 
         //new Sphere(9,600, V3(50,681.6-.27,81.6),V3(12,12,12) * 10,  V3(), DIFF) //Lite 
 
         
