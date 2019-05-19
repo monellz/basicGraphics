@@ -52,10 +52,11 @@ public:
         return true;
     }
     std::pair<V3, V3> aabb() const override {
-        return std::make_pair(V3(), V3());
+        V3 minpos(_minpos,_minpos,_minpos);
+        V3 maxpos(_maxpos,_maxpos,_maxpos);
+        return std::make_pair(minpos,maxpos);
+        //todo!!
     }
 };
-
-
 
 #endif

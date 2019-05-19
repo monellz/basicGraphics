@@ -38,6 +38,9 @@ struct V3{
 	//double operator|(const V3&a) const {return x*a.x + y*a.y + z*a.z;}
 	double dot(const V3&a) const {return x*a.x + y*a.y + z*a.z;}
 	double max() const {return x>y&&x>z?x:y>z?y:z;}
+	int maxAxis() const {
+		return x > y && x > z? 0:(y > z? 1:2);
+	}
 	double len() const {return sqrt(x*x + y*y + z*z);}
 	double len2() const {return x*x + y*y + z*z;}
 	V3 mult(const V3&a) const {return V3(x*a.x, y*a.y, z*a.z);}
@@ -66,6 +69,9 @@ struct V3{
 		} else return v;
 	}
 
+	static V3 random() {
+		return V3(2 * ran() - 1, 2 * ran() - 1, 2 * ran() - 1);
+	}
 
 	void print() const {std::cout << x << " " << y << " " << z << std::endl;}
 };

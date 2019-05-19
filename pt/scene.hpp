@@ -34,7 +34,7 @@ public:
         //-----------------------//
 
 	    //pos 左右(大的在左),上下(大的在上),前后(大的在前)
-        objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
         //new Sphere(6,16.5,V3(27,16.5,47),       V3(),"floor.bmp", SPEC),//Mirr 
         //new Sphere(6,16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, REFR),//Mirr 
 
@@ -43,7 +43,7 @@ public:
         //new Sphere(7,16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, SPEC),//Glas 
 
         //new Sphere(8,16.5,V3(20,60,100),       V3(),V3(.25,.25,.75), DIFF),//Glas 
-        objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
 
 
         
@@ -57,15 +57,13 @@ public:
         
         //--------------obj-----------------
         //objs.push_back(new Triangle(objs.size(),V3(20,60,80),V3(20,40,80),V3(40,40,80),V3(0,0,1),V3(),V3(.25,.25,.95),DIFF));
-        //readObj("dragon.obj");
+        readObj("love.obj");
 
 
-/*
         std::cout << "obj total: " << objs.size() << std::endl;
         std::cout << "build tree" << std::endl;
         tree = new kdTree(objs);
         std::cout << "build tree done" << std::endl;
-        */
     }
 
     void readObj(std::string fn) {
@@ -90,8 +88,8 @@ public:
                 istringstream in(s);
                 std::string type;
                 in >> type >> i >> j >> k;
-                objs.push_back(new Triangle(objs.size(),buf[i],buf[j],buf[k],(buf[i] - buf[j]) & (buf[j] - buf[k]), V3(),V3(1,1,1) * 0.999, REFR));        
-                if (objs.size() > 500) break;
+                objs.push_back(new Triangle(objs.size(),buf[i],buf[j],buf[k],(buf[i] - buf[j]) & (buf[j] - buf[k]), V3(),V3(.85,.25,.25), REFR));        
+                //if (objs.size() > 500) break;
             } else {
                 std::cout << s << endl;
             }
@@ -101,7 +99,7 @@ public:
 
 
     bool findNearest_naive(const Ray& r, Intersection& res) {
-        
+        /*
         double t = 1e30;
         double inf = 1e30;
         for (int i = 0;i < objs.size(); ++i) {
@@ -111,9 +109,26 @@ public:
                 t = foo.t;
             }
         }
-        return t < inf;
+        bool ok =  t < inf;
+
+        Intersection repeat;
+        bool test = tree->intersect(r,repeat,objs);
+        */
+        return tree->intersect(r,res,objs);
         
-        //return tree->intersect(r,res,objs);
+        /*
+        if (ok && test) {
+            if (res.t != repeat.t) {
+                cout << "t error  res.t:" << res.t << " , repeat.t:" << repeat.t << endl;
+            }
+            if (res.id != repeat.id) {
+                cout << "id error  res.id:" << res.id << " , repeat.id:" << repeat.id << endl;
+            }
+        } else {
+            cout << "ok error! ok:" << ok << ",  test:" << test << endl;
+        }
+        */
+        //return ok;
     }
 
     Object* getObj(int id) {
