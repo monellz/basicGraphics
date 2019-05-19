@@ -39,7 +39,7 @@ struct V3{
 	double dot(const V3&a) const {return x*a.x + y*a.y + z*a.z;}
 	double max() const {return x>y&&x>z?x:y>z?y:z;}
 	int maxAxis() const {
-		return x > y && x > z? 0:(y > z? 1:2);
+		return (x > y && x > z)? 0:(y > z? 1:2);
 	}
 	double len() const {return sqrt(x*x + y*y + z*z);}
 	double len2() const {return x*x + y*y + z*z;}

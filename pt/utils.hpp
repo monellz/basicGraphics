@@ -22,6 +22,6 @@ inline double max(double x, double y) {return x > y? x:y;}
 inline double max(double x, double y, double z) {return max(max(x,y),z);}
 
 
-const double _minpos = -100;
-const double _maxpos = 500;
+const double _minpos = -1000;
+const double _maxpos = 1000;
 #endif

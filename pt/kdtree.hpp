@@ -26,14 +26,16 @@ struct kdNode {
     bool hit(const Ray& r) {
         //slab求交
         //内部节点
-        /*
+        
         double tmin[3],tmax[3];
         for (int i = 0;i < 3; ++i) {
-            if (r.d[i] != 0) {
-                tmin[i] = (box.first[i] - r.o[i]) / r.d[i];
-                tmax[i] = (box.second[i] - r.o[i]) / r.d[i];
+            if (fabs(r.d[i]) > EPS) {
+                double t1 = (box.first[i] - r.o[i]) / r.d[i];
+                double t2 = (box.second[i] - r.o[i]) / r.d[i];
+                tmin[i] = min(t1,t2);
+                tmax[i] = max(t1,t2);
             } else {
-                tmin[i] = 1e30;
+                tmin[i] = 1e15;
                 tmax[i] = 1e30;
             }
         }
@@ -42,8 +44,8 @@ struct kdNode {
         double tmax_ = min(tmax[0],tmax[1],tmax[2]);
         if (tmin_ < tmax_) return true;
         else return false;
-        */
         
+        /*
         for (int i = 0;i < 3; ++i) {
             double t1 = -1, t2 = -1;
             if (r.d[i] != 0) {
@@ -55,7 +57,7 @@ struct kdNode {
                 bool ok = true;
                 for (int j = 0;j < 3; ++j) {
                     if (j == i) continue;
-                    if (pts[j] < box.first[j] - EPS || pts[j] > box.second[j] + EPS) {
+                    if (pts[j] < box.first[j] + EPS || pts[j] > box.second[j] - EPS) {
                         ok = false;
                         break;
                     }
@@ -76,6 +78,8 @@ struct kdNode {
             }
         }
         return false;
+        */
+        
         
         /*
         if (r.d.x != 0) {
@@ -115,8 +119,6 @@ private:
     int maxDepth;
     int cnt = 0;
     int nodenum = 0;
-    int raynum = 0;
-    int* mailbox;
 public:
     kdNode* root;
     kdTree(std::vector<Object*>& ptr) {
@@ -125,8 +127,6 @@ public:
 
         //最大深度经验公式 8 + 1.3 log(n)
         maxDepth = int(8.5 + 1.3 * log(ptr.size()));
-        mailbox = new int[ptr.size()];
-        memset(mailbox,0,sizeof(int) * ptr.size());
 
 
         //计算边界盒
@@ -157,7 +157,6 @@ public:
         if (cur->leaf) {
             //当前为叶子
             //逐一测试
-            double t = 1e30;
             for (int i = 0;i < cur->num; ++i) {
                 Intersection foo;
                 if (objs[cur->index[i]]->intersect(r,foo)) {
@@ -170,6 +169,7 @@ public:
         }        
 
         //当前为内部节点
+        //double tmin,tmax;
         if (cur->lc->hit(r)) _intersect(r,res,objs,cur->lc);
         //_intersect(r,res,objs,cur->lc);
         if (cur->rc->hit(r)) _intersect(r,res,objs, cur->rc);
@@ -194,10 +194,7 @@ public:
             //终止 当前节点设置为叶子
             cur->leaf = true;
             cur->box = box;
-            cout << "leaf box:" << endl;
-            cur->box.first.print();
-            cur->box.second.print();
-            cout << "leaf box end---" << endl;
+
             cur->index = new int[objIndex.size()];
             for (int i = 0;i < objIndex.size(); ++i) cur->index[i] = objIndex[i];
             cur->num = objIndex.size();
@@ -209,10 +206,7 @@ public:
         cur->leaf = false;
         cur->innernum = objIndex.size();
         cur->box = box;
-        cout << "inner box:" << endl;
-        cur->box.first.print();
-        cur->box.second.print();
-        cout << "inner box end---" << endl;
+
         
         int axis = (box.second - box.first).maxAxis(); //选择最长的轴
 
@@ -231,11 +225,7 @@ public:
         std::vector<int> right(objIndex.begin() + mid, objIndex.end());
 
         std::cout << "axis:" << axis  << ", left size:" << left.size() << ", " << "right size:" << right.size() << std::endl;
-        std::cout << "left" << endl;
-        for (int i = 0;i < left.size(); ++i) cout << left[i] << "," << boxes[left[i]].second[axis] << "  ";
-        cout << endl << "right" << endl;
-        for (int i = 0;i < right.size(); ++i) cout << right[i] << "," << boxes[right[i]].second[axis] << "  ";
-        cout << endl;
+
         cur->lc = new kdNode;
         cur->rc = new kdNode;
         nodenum += 2;

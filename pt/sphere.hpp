@@ -62,7 +62,7 @@ public:
 	}
 
 	std::pair<V3, V3> aabb() const override {
-		return std::make_pair(o - rad, o + rad);
+		return std::make_pair(o - rad - EPS, o + 2 * rad + EPS); //EPS必须加
 	}
 };
 
