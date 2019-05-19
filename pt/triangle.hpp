@@ -13,8 +13,6 @@ public:
             pts[0] = p1;
             pts[1] = p2;
             pts[2] = p3;
-
-            n = (p1 - p2) & (p2 - p3).norm();
         }
     double intersect(const Ray& r) override {
         return 0;

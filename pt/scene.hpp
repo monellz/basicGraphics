@@ -18,7 +18,7 @@ public:
         */
         //new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.25,.25),DIFF),//Back 
 
-        objs.push_back(new Plane(objs.size(),V3(0,0,1),0,V3(),V3(.25,.25,.75),DIFF));  //Back
+        objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         //objs.push_back(new Plane(objs.size(),V3(0,0,1),0,V3(),"floor.bmp",DIFF));  //Back
 
         //new Sphere(3,1e5, V3(50,40.8,-1e5+170), V3(),V3(.25,.25,.25),DIFF),//Frnt 
@@ -88,7 +88,7 @@ public:
                 istringstream in(s);
                 std::string type;
                 in >> type >> i >> j >> k;
-                objs.push_back(new Triangle(objs.size(),buf[i],buf[j],buf[k],(buf[i] - buf[j]) & (buf[j] - buf[k]), V3(),V3(.85,.25,.25), REFR));        
+                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.85,.25,.25), REFR));        
                 //if (objs.size() > 500) break;
             } else {
                 std::cout << s << endl;
