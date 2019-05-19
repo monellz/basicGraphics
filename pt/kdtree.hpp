@@ -177,8 +177,9 @@ public:
     }
 
     bool intersect(const Ray& r, Intersection& res, std::vector<Object*>& objs) {
-        //static int id = 1;
         //cnt = 0;
+        //bool visited[objs.size()];
+        //memset(visited,0,sizeof(bool) * objs.size());
         _intersect(r,res,objs,root);
         //std::cout << "raynum: " << raynum << std::endl;
         //printf("id : %d\n",id);
