@@ -63,7 +63,8 @@ int main(int argc, char*argv[])
 	
 
 	//Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
-	Ray cam(V3(-5,32,280), V3(0.15,-0.05,-1).norm()); 
+	//Ray cam(V3(-5,32,280), V3(0.15,-0.05,-1).norm()); 
+	Ray cam(V3(-5,50,280), V3(0.15,-0.15,-1).norm()); 
 
 	double fr = 0.5; //basic
 

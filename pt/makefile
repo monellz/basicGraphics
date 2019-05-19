@@ -1,4 +1,4 @@
-main: main.cpp utils.hpp
+main: main.cpp utils.hpp scene.hpp
 	g++ main.cpp -o main -fopenmp -std=c++11
 
 

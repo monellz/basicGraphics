@@ -39,6 +39,43 @@ public:
         //new Sphere(6,16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, REFR),//Mirr 
 
 
+        objs.push_back(new Sphere(objs.size(),3,V3(53,3,68),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(53,3,78),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(53,3,88),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(53,3,98),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(53,3,108),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(57,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(61,3,115),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(68,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+
+
+        objs.push_back(new Sphere(objs.size(),3,V3(18,3,80),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(24,3,80),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(30,3,80),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(36,3,80),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        //objs.push_back(new Sphere(objs.size(),3,V3(42,3,80),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+
+        objs.push_back(new Sphere(objs.size(),3,V3(20,3,86),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(24,3,92),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(28,3,98),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(32,3,106),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(36,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+
+        objs.push_back(new Sphere(objs.size(),3,V3(29,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(23,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(17,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+
+
+        objs.push_back(new Sphere(objs.size(),3,V3(3,3,86),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(-15,3,86),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(0,3,92),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(-10,3,92),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(-5,3,98),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(0,3,106),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(-10,3,106),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(3,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),3,V3(-15,3,112),       V3(),V3(1,1,1)*.999, REFR));//Glas 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas 
         //objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas 
         //new Sphere(7,16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, SPEC),//Glas 
 
@@ -48,7 +85,7 @@ public:
 
         
 
-        objs.push_back(new Sphere(objs.size(),30, V3(50,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF)); //Lite 
+        objs.push_back(new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF)); //Lite 
         //objs.push_back(new Sphere(objs.size(),30, V3(50,101.6-.5,101.6),V3(12,12,12),  V3(), DIFF)); //Lite 
         //new Sphere(9,600, V3(50,681.6-.27,81.6),V3(12,12,12) * 10,  V3(), DIFF) //Lite 
 
