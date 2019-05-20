@@ -10,8 +10,13 @@
 - [ ] 体积光
 - [ ] 场景重构
 - [ ] obj文件处理
+- [ ] 把trace重构
 
 ## Photon Mapping
 
 - [ ] photon mapping tracer
 - [ ] 整合pm
+
+## PPM
+
+- [ ] 整合
