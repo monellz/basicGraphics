@@ -112,6 +112,7 @@ struct kdNode {
         return -1;
         */
     }
+
 };
 
 class kdTree {
@@ -184,7 +185,8 @@ public:
         //std::cout << "raynum: " << raynum << std::endl;
         //printf("id : %d\n",id);
         //if (cnt < objs.size() && cnt > 0) std::cout << cnt << std::endl;
-        if (res.t > 0) return true;
+        if (res.t > 0 && res.id >= 0) return true;
+        else return false;
     }
 
 

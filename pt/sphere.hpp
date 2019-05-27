@@ -64,6 +64,16 @@ public:
 	std::pair<V3, V3> aabb() const override {
 		return std::make_pair(o - rad - EPS, o + rad + EPS); //EPS必须加????
 	}
+
+	Ray light() {
+		//向y轴负发射光线/光子
+		double x = 2 * ran() - 1;
+		double y = -ran();
+		double z = 2 * ran() - 1;
+		Ray r(V3(),V3(x,y,z));
+		r.o = o + r.d * (rad + 2 * EPS);
+		return r;
+	}
 };
 
 #endif

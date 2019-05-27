@@ -1,5 +1,5 @@
 main: main.cpp utils.hpp scene.hpp
-	g++ main.cpp -o main -fopenmp -std=c++11
+	g++ main.cpp ray.hpp -o main -fopenmp -std=c++11 -O3
 
 
 test: main
