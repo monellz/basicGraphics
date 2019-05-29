@@ -74,10 +74,10 @@ public:
     }
 
     void run() {
-        std::cout << "emit start" << std::endl;
+        std::cout << "emit num: " << emit_num << std::endl;
         for (int i = 0;i < emit_num; ++i) {
             //std::cout << "emit index:" << i << std::endl;
-            unsigned short X[3] = {i + 1, i * i + 10, i * i * i + 100};
+            unsigned short X[3] = {i + 1, sqrt(i) + 10, exp(i) + 100};
             Photon pt = scene->emitPhoton(emit_num);
             //std::cout << "tracing start" << std::endl;
             tracing(pt,0,X);

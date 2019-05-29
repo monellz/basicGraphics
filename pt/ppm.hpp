@@ -27,12 +27,14 @@ private:
         //nl 入射光对应法向量
 
         double p=f.max();
-        if(++dep> 5)
+        if(++dep> 5) {
+            //if (dep > 25) return;
             if(erand48(X)<p) f/=p;
             //if(erand48(X)<p) f = f;
             //else return obj->material.e;
             //else return obj->material.e;
             else return;
+        }
         if(obj->material.refl==DIFF){
             //cout << "into diff" << endl;
             
@@ -196,7 +198,7 @@ public:
                         unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
                         //basic
                         r[0]=r[1]=r[2]=0;
-                        for(int s=0;s<5;++s){
+                        for(int s=0;s<3;++s){
                             double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
                             double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
                             V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
@@ -235,8 +237,8 @@ public:
             //cout << "x,y: "<< x << ", " << y << endl;
 
             //img[x * w + y] = img[x * w + y] + hp->flux / (PI * hp->r2 * PPM_EMIT_PHOTONS);
-            img[hp->index] = img[hp->index] + hp->flux / (PI * hp->r2 * PPM_ROUND * PI);
-            //多除以一个PI控制光亮度
+            img[hp->index] = img[hp->index] + hp->flux / (PI * hp->r2 * PPM_ROUND);
+            //多除以一个PI控制光亮度?
             //tmp[x * w + y] += hp->flux / (PI * hp->r2 * PPM_ROUND);
 
 
@@ -254,11 +256,11 @@ public:
             img[x * w + y] += r / nh.items.size();
             */
         }
-        /*
+        
         for (int i = 0;i < h; ++i) {
             for (int j = 0;j < w; ++j) {
                 //cout << "------" << endl;
-
+                /*
                 //method 2 附近像素平均
                 //会很模糊
                 int cnt = 0;
@@ -273,12 +275,13 @@ public:
                     }
                 }
                 img[i * w + j] /= cnt;
+                */
 
                 img[i * w + j] = img[i * w + j].clamp();
                 //cout << "------" << endl;
             }
         }
-        */
+        
     }
 };
 
