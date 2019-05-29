@@ -38,5 +38,10 @@ const double _maxpos = 1000;
 #define PPM_ROUND 1 //PPM迭代次数
 
 
+//景深效果  限pt
+#define DEPTH
+#define FOCAL_RAD 5  //景深随机圆盘取点半径
+#define FOCAL_DIS 78
+
 
 #endif

@@ -12,8 +12,12 @@ public:
     std::vector<Object*> objs;
     kdTree* tree;
     Sphere* lighter;
+    Plane* focal; //焦平面
     Scene(){
-        
+        //id = -1 只能单独测试相交
+        focal = new Plane(-1,V3(0,0,1),FOCAL_DIS,V3(),V3(),DIFF);
+
+
         //objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),SPEC));//Left ??????????
         //objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+99,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght 
         
@@ -134,6 +138,7 @@ public:
 
     ~Scene() {
         for (int i = 0;i < objs.size(); ++i) delete objs[i];
+        if (focal != nullptr) delete focal;
         objs.clear();
     }
 };

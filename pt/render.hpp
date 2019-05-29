@@ -111,12 +111,29 @@ public:
                         unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
                         //basic
                         r[0]=r[1]=r[2]=0;
+                        #ifndef DEPTH
                         for(int s=0;s<samp;++s){
                             double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
                             double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
                             V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
                             r+=radiance(Ray(cam.o+d*120,d.norm()),0,X); //basic
                         }
+                        #else
+                        //景深随机取点
+                        V3 d = cx * (x * 1.0 / w - 0.5) + cy * (y * 1.0 / h - 0.5) + cam.d;
+                        //与焦平面交点
+                        Intersection result;
+                        Ray ray(cam.o + d * 120, d.norm());
+                        if (!scene->focal->intersect(ray,result)) continue;
+                        V3 pos = ray.pos(result.t);
+                        //随机取点
+                        for (int s = 0; s < samp; ++s) {
+                            double rad = FOCAL_RAD * erand48(X);
+                            double theta = 2 * erand48(X) * PI;
+                            V3 origin = cam.o + d * 120 + cx * rad * cos(theta) + cy * rad * sin(theta);
+                            r += radiance(Ray(origin,(pos - origin).norm()),0,X);
+                        }
+                        #endif
                         img[y*w+x]+=(r/samp).clamp()/4;
                     }
             
