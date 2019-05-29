@@ -38,8 +38,9 @@ private:
             
             HitPoint hp;
             hp.pos = x;
-            hp.x = i;
-            hp.y = j;
+            //hp.x = i;
+            //hp.y = j;
+            hp.index = i * w + j;
             hp.color = obj->material.e + f * factor;
             hm->store(hp);
             /*
@@ -217,7 +218,7 @@ public:
 
             for (int i = 0;i < PPM_EMIT_PHOTONS; ++i) {
                 fprintf(stderr,"\rround %d  emited %5.2f%%",round,100.* i / PPM_EMIT_PHOTONS);
-                unsigned short X[3] = {i + 1, i + 10, i + 100};
+                unsigned short X[3] = {i + 1, i * i + 10, exp(i) + 100};
                 Photon pt = scene->emitPhoton(PPM_EMIT_PHOTONS);
                 //pt.power = pt.power * 2500 * PI * 4;
                 photontrace(pt,V3(1,1,1),0,X);
@@ -229,12 +230,12 @@ public:
         V3* tmp = new V3[w * h];
         for (int i = 0; i < hm->getStoreNum(); ++i) {
             HitPoint* hp = hm->getHitPoint(i);
-            int x = hp->x;
-            int y = hp->y;
+            //int x = hp->x;
+            //int y = hp->y;
             //cout << "x,y: "<< x << ", " << y << endl;
 
             //img[x * w + y] = img[x * w + y] + hp->flux / (PI * hp->r2 * PPM_EMIT_PHOTONS);
-            img[x * w + y] = img[x * w + y] + hp->flux / (PI * hp->r2 * PPM_ROUND * PI);
+            img[hp->index] = img[hp->index] + hp->flux / (PI * hp->r2 * PPM_ROUND * PI);
             //多除以一个PI控制光亮度
             //tmp[x * w + y] += hp->flux / (PI * hp->r2 * PPM_ROUND);
 

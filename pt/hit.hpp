@@ -6,7 +6,8 @@
 struct HitPoint {
     V3 pos;
 
-    int x,y; //该碰撞点对应的图像坐标
+    //int x,y; //该碰撞点对应的图像坐标
+    int index; //对应图像坐标 x * w + y
 
     //brdf
     //pixel position
@@ -15,10 +16,10 @@ struct HitPoint {
 
 
     double r2; //当前光子半径平方
-    int cnt; //累计光子数目
+    unsigned int cnt; //累计光子数目
     V3 flux; //累计反射光通量
 
-    HitPoint():x(-1),y(-1),r2(PPM_INIT_R2),cnt(0){}
+    HitPoint():index(0),r2(PPM_INIT_R2){}
 };
 
 
