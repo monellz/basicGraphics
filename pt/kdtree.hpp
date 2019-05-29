@@ -123,9 +123,6 @@ private:
 public:
     kdNode* root;
     kdTree(std::vector<Object*>& ptr) {
-        std::cout << "into init" << std::endl; 
-        
-
         //最大深度经验公式 8 + 1.3 log(n)
         maxDepth = int(8.5 + 1.3 * log(ptr.size()));
 
@@ -147,12 +144,8 @@ public:
         std::vector<int> objIndex;
         objIndex.resize(ptr.size());
         for (int i = 0; i < ptr.size(); ++i) objIndex[i] = i;
-        std::cout << "init done" << std::endl;
         build(0,root,box, objIndex, boxes);
 
-
-        std::cout << "node num: " << nodenum <<  std::endl;
-        std::cout << "max depth: " << maxDepth << std::endl;
     }
     void _intersect(const Ray& r, Intersection& res, std::vector<Object*>& objs,kdNode* cur) {
         if (cur->leaf) {
@@ -225,8 +218,6 @@ public:
 
         std::vector<int> left(objIndex.begin(),objIndex.begin() + mid);
         std::vector<int> right(objIndex.begin() + mid, objIndex.end());
-
-        std::cout << "axis:" << axis  << ", left size:" << left.size() << ", " << "right size:" << right.size() << std::endl;
 
         cur->lc = new kdNode;
         cur->rc = new kdNode;

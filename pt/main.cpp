@@ -4,9 +4,12 @@
 #include "scene.hpp"
 #include "camera.hpp"
 #include "tracer.hpp"
+#include "render.hpp"
+
+#include "ppm.hpp"
 
 Scene scene;
-
+/*
 const int DEPTH = 5; //basic
 V3 pm_radiance(const Ray& r,PhotonMap& pm,int dep, unsigned short *X) {
 
@@ -102,12 +105,19 @@ V3 radiance(const Ray&r, int dep,unsigned short *X){
 		}
 	}
 }
-
+*/
 int main(int argc, char*argv[])
 {
 	int w=atoi(argv[1]), h=atoi(argv[2]), samp=atoi(argv[4])/4;
 	std::string fn(argv[3]);
-	
+
+	//Render* render = new PT(w,h,samp,&scene);
+	//Render* render = new PM(w,h,samp,&scene);
+	Render* render = new PPM(w,h,samp,&scene);
+	render->rendering();
+	render->generateIMG(fn);
+
+/*	
 	cout << "asdas" << endl;	
 	PhotonMap pm(10000000);
 	PMtracer pmtracer(&scene,&pm);
@@ -130,11 +140,6 @@ int main(int argc, char*argv[])
 		fprintf(stderr,"\rUsing %d spp  %5.2f%%",samp*4,100.*y/h);
 		for(int x=0;x<w;++x){
 			//not basic
-			/*
-			unsigned short X[3]={y,y*x,y*x*y};
-			V3 d = cx * (x/w) + cy * (y/h) + cam.d;
-			c[y * w + x] = pm_radiance(Ray(cam.o,d),pm,0,X);
-			*/
 			
 			for(int sy=0;sy<2;++sy)
 				for(int sx=0;sx<2;++sx)
@@ -160,5 +165,6 @@ int main(int argc, char*argv[])
 	for(int y=h-1;y>=0;--y)
 		for(int x=w-1;x>=0;--x)
 			fprintf(f,"%c%c%c",toColor(c[y*w+x][0]),toColor(c[y*w+x][1]),toColor(c[y*w+x][2]));
+*/
 	return 0;
 }

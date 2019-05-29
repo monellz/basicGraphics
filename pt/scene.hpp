@@ -35,7 +35,7 @@ public:
         //-----------------------//
 
 	    //pos 左右(大的在左),上下(大的在上),前后(大的在前)
-        objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, REFR));//Mirr 
+        objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
         //new Sphere(6,16.5,V3(27,16.5,47),       V3(),"floor.bmp", SPEC),//Mirr 
         //new Sphere(6,16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, REFR),//Mirr 
 
@@ -128,6 +128,7 @@ public:
         pt.pos = r.o;
         pt.dir = r.d;
         pt.power = lighter->material.e * 4 * PI * PI * lighter->rad * lighter->rad / cnt;
+        //pt.power = lighter->material.e * 4 * PI * lighter->rad * lighter->rad / cnt;
         return pt;
     }
 

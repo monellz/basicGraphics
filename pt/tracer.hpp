@@ -8,7 +8,8 @@ class PMtracer {
 public:
     Scene* scene;
     PhotonMap* photonmap;
-    PMtracer(Scene* scene_,PhotonMap* pm_):scene(scene_),photonmap(pm_){}
+    int emit_num;
+    PMtracer(int emit_num_,Scene* scene_,PhotonMap* pm_):emit_num(emit_num_),scene(scene_),photonmap(pm_){}
 
     void tracing(const Photon& photon, int dep, unsigned short *X) {
         Intersection res;
@@ -25,16 +26,6 @@ public:
         V3 color = obj->material.color(res.a,res.b);
         V3 x = r.pos(res.t),nl = res.n;
 
-
-        //double p = color.max();
-        /*
-        double p = max(color,obj->material.e).max();
-        p = max(p,EPS);
-        if (++dep > 5) {
-            if (erand48(X) < p) color /= p; //!!!概率!!!!!
-            else return;
-        }
-        */
 
         if (obj->material.refl == DIFF) {
             double p = color.max(); //??有些人用的平均色光作为概率
@@ -84,11 +75,10 @@ public:
 
     void run() {
         std::cout << "emit start" << std::endl;
-        int emmit_photon = 100000;
-        for (int i = 0;i < emmit_photon; ++i) {
+        for (int i = 0;i < emit_num; ++i) {
             //std::cout << "emit index:" << i << std::endl;
-            unsigned short X[3] = {i + 1, i + 10, i + 100};
-            Photon pt = scene->emitPhoton(emmit_photon);
+            unsigned short X[3] = {i + 1, i * i + 10, i * i * i + 100};
+            Photon pt = scene->emitPhoton(emit_num);
             //std::cout << "tracing start" << std::endl;
             tracing(pt,0,X);
         }

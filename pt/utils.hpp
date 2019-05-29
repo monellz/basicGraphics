@@ -26,4 +26,17 @@ const double _minpos = -1000;
 const double _maxpos = 1000;
 
 
+
+#define PM_MAX_PHOTONS 100000
+#define PM_EMIT_PHOTONS 100000
+
+
+#define PPM_ALPHA 0.7  //ppm reduce系数
+#define PPM_MAX_PHOTONS 100000
+#define PPM_EMIT_PHOTONS 100000
+#define PPM_INIT_R2 25 //初始化碰撞点半径平方
+#define PPM_ROUND 1 //PPM迭代次数
+
+
+
 #endif
