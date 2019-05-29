@@ -182,20 +182,20 @@ public:
             for(int x=0;x<w;++x){
                 //cout << "x: " 0<< x << endl;
                 
-                
+                /*
                 unsigned short X[3]={y+1,y*x+2,y*x*y+3*4};
                 V3 d = cx * (x * 1. / w - 0.5) + cy * (y * 1. / h - 0.5) + cam.d;
                 raytrace(Ray(cam.o+d*120,d.norm()),y,x,V3(1,1,1),0,X); //basic
                 
                 
-                /*
+                */
                 for(int sy=0;sy<2;++sy)
                     for(int sx=0;sx<2;++sx)
                     {
                         unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
                         //basic
                         r[0]=r[1]=r[2]=0;
-                        for(int s=0;s<1;++s){
+                        for(int s=0;s<5;++s){
                             double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
                             double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
                             V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
@@ -203,7 +203,7 @@ public:
                             raytrace(Ray(cam.o+d*120,d.norm()),y,x,V3(1,1,1) / (samp * 4.0),0,X); //basic
                         }
                     }
-                */
+                
             }
         }
         hm->build();

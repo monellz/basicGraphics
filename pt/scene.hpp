@@ -44,7 +44,8 @@ public:
         //new Sphere(6,16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, REFR),//Mirr 
 
         //new Sphere(8,16.5,V3(20,60,100),       V3(),V3(.25,.25,.75), DIFF),//Glas 
-        objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
+        objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", REFR));//Glas 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),V3(0.75,0.25,0.25), DIFF));//Glas 
         objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
 
 

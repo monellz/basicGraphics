@@ -102,7 +102,7 @@ public:
 
 
         #pragma omp parallel for schedule(dynamic, 1) private(r)
-        for(int y=0;y<h;++y){
+        for(int y = 0;y < h; ++y) {
             fprintf(stderr,"\rUsing %d spp  %5.2f%%",samp*4,100.*y/h);
             for(int x=0;x<w;++x){
                 for(int sy=0;sy<2;++sy)
@@ -135,11 +135,68 @@ public:
                         }
                         #endif
                         img[y*w+x]+=(r/samp).clamp()/4;
+                        //img[y * w + x] += (r / samp) / 4;
                     }
             
             
             }
         }
+
+        
+        /*
+        #pragma omp parallel for schedule(dynamic, 1) private(r)
+        for (int y = 0;y < h; ++y) {
+            fprintf(stderr,"\rray marching  %5.2f%%",100.*y/h);
+            for (int x = 0; x < w; ++x) {
+                unsigned short X[3]={y,y*x,y*x*y};
+                V3 d = cx * (x * 1.0 / w - 0.5) + cy * (y * 1.0 / h - 0.5) + cam.d;
+                Intersection result;
+                Ray ray(cam.o + d * 120, d);
+                if(!scene->findNearest_naive(ray,result)) continue;
+
+                
+                //积分计算体积光
+                //V3 q = ray.o - ((Sphere*)scene->getObj(3))->o;
+                V3 q = ray.o - scene->lighter->o;
+                double b = ray.d.dot(q);
+                double c = q.dot(q);
+                double iv = 100 / sqrt(c - b * b);
+                double l =iv * (atan((result.t + b) * iv) - atan(b * iv));
+
+
+                double ctheta = q.norm().dot(ray.d);
+                double g = 0.1;
+                double factor = 1 / ( 4 * PI) * (1 - g * g) / pow(1 + g * g - 2 * g * ctheta,1.5);
+
+                img[y * w + x] += l * factor;
+                img[y * w + x] = img[y * w + x].clamp();
+                
+                //直接计算
+                const int stepNum = 100;
+                const double e = 5;
+                double stepSize = result.t / stepNum;
+                double t = 0;
+                V3 intense;
+                double l = 0;
+                for (int k = 0;k < stepNum; ++k) {
+                    V3 p = ray.pos(t);
+                    Intersection tmp_res;
+                    if (scene->findNearest_naive(Ray(p,scene->lighter->o - p),tmp_res)) {
+                        double vlight = e / (p - scene->lighter->o).len();
+                        l += vlight;
+                    }
+                    t += stepSize;
+                }
+ 
+                double ctheta = (ray.o - scene->lighter->o).norm().dot(ray.d);
+                double g = 0.1;
+                double factor = 1 / ( 4 * PI) * (1 - g * g) / pow(1 + g * g - 2 * g * ctheta,1.5);               
+
+                img[y * w + x] += l * factor;
+                img[y * w + x] = img[y * w + x].clamp();
+            }
+        }
+        */
     }
 
     
