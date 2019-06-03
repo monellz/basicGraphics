@@ -37,16 +37,33 @@ public:
 
 class PT: public Render {
 private:
+    int checkShadow(const V3& pos) {
+        Ray r(pos,scene->lighter->o - pos);
+        Intersection res;
+        if (!scene->findNearest_naive(r,res)) return 0;
+        if (res.id != scene->objs.size() - 1) return 0;
+        return 1;
+    }
+    V3 raymarch(const Ray& ray, const V3& pos) {
+        //samp = 1000
+        double steplength = (pos - ray.o).len() / 1000;
+        V3 color;
+        for (int i = 0;i < 1000; ++i) {
+            double shadow = (double)checkShadow(ray.pos(steplength));
+            color += V3(0.5,0.5,0.5) * shadow * steplength / (10 * 0.5);
+            color *= exp( - 0.2 * steplength);
+        }
+        return color;
+    }
     V3 radiance(const Ray&r, int dep,unsigned short *X){
         Intersection res;
-        //if(!intersect(r,t,id))return V3();
-        //if(!intersect(r,t,res))return V3();
         if(!scene->findNearest_naive(r,res))return V3();
-        //Sphere&obj=scene[id];
         Object* obj = scene->getObj(res.id);
-        //if (res.into == 0 && res.id == 7) cout << res.id << endl;
 
-        //V3 x=r.pos(t),n=(x-obj.o).norm(),f=obj.material.c,nl=n.dot(r.d)<0?into=1,n:-n;
+        //体积光 ray march
+
+
+
         V3 x=r.pos(res.t),nl = res.n,f=obj->material.color(res.a,res.b);
         //n 球心到交点
         //nl 入射光对应法向量
@@ -171,19 +188,33 @@ public:
                 img[y * w + x] += l * factor;
                 img[y * w + x] = img[y * w + x].clamp();
                 
+                
                 //直接计算
                 const int stepNum = 100;
-                const double e = 5;
+                const double e = 20;
                 double stepSize = result.t / stepNum;
                 double t = 0;
                 V3 intense;
                 double l = 0;
                 for (int k = 0;k < stepNum; ++k) {
                     V3 p = ray.pos(t);
+                   
                     Intersection tmp_res;
                     if (scene->findNearest_naive(Ray(p,scene->lighter->o - p),tmp_res)) {
                         double vlight = e / (p - scene->lighter->o).len();
                         l += vlight;
+                    }
+                    t += stepSize;
+                    
+                    for (int s = 0; s < 10; ++s) {
+                        Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
+                        Intersection tmp;
+                        if (scene->findNearest_naive(r,tmp)) {
+                            if (tmp.id == scene->objs.size() - 1) {
+                                double vlight = e / (p - scene->lighter->o).len();
+                                l += vlight / 10;
+                            }
+                        }
                     }
                     t += stepSize;
                 }
@@ -227,7 +258,7 @@ private:
         if(obj->material.refl==DIFF){
             //cout << "into diff" << endl;
             int photon_num = 0;
-            V3 tmp =  pm.irradEstimate(x,f,10,photon_num) * p;
+            V3 tmp =  pm.irradEstimate(x,f,PM_R,photon_num) * p;
             //V3 tmp =  pm.irradEstimate(x,f,5,photon_num) * p;
             //tmp.print();
             return obj->material.e + tmp;
@@ -273,7 +304,7 @@ public:
         //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
 
 
-        //#pragma omp parallel for schedule(dynamic, 1) private(r)
+        #pragma omp parallel for schedule(dynamic, 1) private(r)
         for(int y=0;y<h;++y){
             fprintf(stderr,"\rUsing %d spp  %5.2f%%",samp*4,100.*y/h);
             for(int x=0;x<w;++x){

@@ -6,7 +6,8 @@
 #include <cmath>
 
 #define EPS (1e-6)
-#define PI (acos(-1))
+//#define PI (acos(-1))
+#define PI (3.14159265358979323846)
 
 
 enum Refl_t { DIFF, SPEC, REFR };
@@ -27,19 +28,20 @@ const double _maxpos = 1000;
 
 
 
-#define PM_MAX_PHOTONS 1000000
-#define PM_EMIT_PHOTONS 1000000
+#define PM_MAX_PHOTONS 200000
+#define PM_EMIT_PHOTONS 100000
+#define PM_R 10
 
 
 #define PPM_ALPHA 0.7  //ppm reduce系数
-#define PPM_MAX_PHOTONS 100000
-#define PPM_EMIT_PHOTONS 100000
-#define PPM_INIT_R2 25 //初始化碰撞点半径平方
-#define PPM_ROUND 2 //PPM迭代次数
+#define PPM_MAX_PHOTONS 1000000
+#define PPM_EMIT_PHOTONS 1000000
+#define PPM_INIT_R2 9 //初始化碰撞点半径平方
+#define PPM_ROUND 1 //PPM迭代次数
 
 
 //景深效果  限pt
-#define DEPTH
+//#define DEPTH
 #define FOCAL_RAD 5  //景深随机圆盘取点半径
 #define FOCAL_DIS 78
 

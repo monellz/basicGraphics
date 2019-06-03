@@ -6,6 +6,7 @@
 #include "plane.hpp"
 #include "triangle.hpp"
 #include "kdtree.hpp"
+#include "bezier.hpp"
 
 class Scene {
 public:
@@ -17,55 +18,43 @@ public:
         srand(time(0));
         //id = -1 只能单独测试相交
         focal = new Plane(-1,V3(0,0,1),FOCAL_DIS,V3(),V3(),DIFF);
-
-
-        //objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),SPEC));//Left ??????????
-        //objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+99,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght 
         
-        //new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.25,.25),DIFF),//Back 
-
+        
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
-        //objs.push_back(new Plane(objs.size(),V3(0,0,1),0,V3(),"floor.bmp",DIFF));  //Back
-
-        //new Sphere(3,1e5, V3(50,40.8,-1e5+170), V3(),V3(.25,.25,.25),DIFF),//Frnt 
-        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8,-1e5+500), V3(),V3(.25,.25,.25),DIFF));//Frnt 
-        
-        //objs.push_back(new Sphere(objs.size(),1e5, V3(50, 1e5, 81.6),    V3(),V3(.75,.75,.75),DIFF));//Botm 
-        //objs.push_back(new Sphere(objs.size(),1e5, V3(50, 1e5, 81.6),    V3(),"floor.bmp",DIFF));//Botm 
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
-
-        
-        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+81.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top 
-
-        //-----------------------//
-
 	    //pos 左右(大的在左),上下(大的在上),前后(大的在前)
         objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
-        //new Sphere(6,16.5,V3(27,16.5,47),       V3(),"floor.bmp", SPEC),//Mirr 
-        //new Sphere(6,16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, REFR),//Mirr 
-
-        //new Sphere(8,16.5,V3(20,60,100),       V3(),V3(.25,.25,.75), DIFF),//Glas 
         objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
-        //objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),V3(0.75,0.25,0.25), DIFF));//Glas 
         objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5 + 10,78),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
-
-
-        
-
-        //lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         objs.push_back(lighter);
-        //objs.push_back(new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF)); //Lite 
-        //objs.push_back(new Sphere(objs.size(),30, V3(50,101.6-.5,101.6),V3(12,12,12),  V3(), DIFF)); //Lite 
-        //new Sphere(9,600, V3(50,681.6-.27,81.6),V3(12,12,12) * 10,  V3(), DIFF) //Lite 
-
         
+        //bezier
+        double x[] = {-1.5,-34.932,-17.114,-53.07,-75.482,-13.668,-2.101,-52.495,-1.5};
+        double y[] = {-13.388,-11.352,28.102,74.719,74.358,-17.459,-18.544,-23.824,-23.315};
+        objs.push_back(new Bezier(0,x,y,9,V3(0,0,0),V3(1,1,1) * 0.99,SPEC));
 
+
+
+
+        lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
+        objs.push_back(lighter);
+        /*
+        objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),DIFF));//Left
+        objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+99,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght
+        objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.75,.75),DIFF));//Back
+        objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8,-1e5+170), V3(),V3(),           DIFF));//Frnt
+        objs.push_back(new Sphere(objs.size(),1e5, V3(50, 1e5, 81.6),    V3(),V3(.75,.75,.75),DIFF));//Botm
+        objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+81.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top
+        objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr
+        objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas
+        lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
+        objs.push_back(lighter);
+        */
         
         //--------------obj-----------------
         //objs.push_back(new Triangle(objs.size(),V3(20,60,80),V3(20,40,80),V3(40,40,80),V3(0,0,1),V3(),V3(.25,.25,.95),DIFF));
-        //readObj("love.obj");
-
+        //readObj("bezier_mesh.obj");
 
         std::cout << "obj total: " << objs.size() << std::endl;
         std::cout << "build tree" << std::endl;
@@ -88,14 +77,15 @@ public:
                 std::string type;
                 istringstream in(s);
                 in >> type >> x >> y >> z;
-                buf.push_back(V3(x,y,z));
+                buf.push_back(V3(x + 30,y + 30,z + 20));
             } else if (s[0] == 'f') {
                 //面
                 int i,j,k;
                 istringstream in(s);
                 std::string type;
                 in >> type >> i >> j >> k;
-                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.85,.25,.25), REFR));        
+                //objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.85,.25,.25), REFR));        
+                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(1,1,1)*0.99, REFR));        
                 //if (objs.size() > 500) break;
             } else {
                 std::cout << s << endl;

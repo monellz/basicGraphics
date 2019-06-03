@@ -16,8 +16,8 @@ int main(int argc, char*argv[])
 	std::string fn(argv[3]);
 
 	//Render* render = new PT(w,h,samp,&scene);
-	//Render* render = new PM(w,h,samp,&scene);
-	Render* render = new PPM(w,h,samp,&scene);
+	Render* render = new PM(w,h,samp,&scene);
+	//Render* render = new PPM(w,h,samp,&scene);
 	render->rendering();
 	render->generateIMG(fn);
 	return 0;

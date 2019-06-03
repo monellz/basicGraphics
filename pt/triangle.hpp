@@ -14,9 +14,7 @@ public:
             pts[1] = p2;
             pts[2] = p3;
         }
-    double intersect(const Ray& r) override {
-        return 0;
-    }
+
     bool intersect(const Ray& r, Intersection& res) override {
         if (n.dot(r.d) == 0) return 0;
         //cramer法则求解

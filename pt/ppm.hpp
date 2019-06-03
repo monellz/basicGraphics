@@ -108,10 +108,12 @@ private:
             Nearest<HitPoint> nh(x,sqrt(PPM_INIT_R2));
             hm->searchHitPoints(nh);
             //cout << "find hitpoint: " << nh.items.size() << endl;
+            //#pragma omp critical
             for (int i = 0;i < nh.items.size(); ++i) {
                 HitPoint* hp = nh.items[i];
                 if ((hp->pos - x).len2() > hp->r2) continue;
                 //hm->reduce(hp,factor * (obj->material.e + photon.power * hp->color),1);
+                #pragma omp critical
                 hm->reduce(hp,photon.power * hp->color,1);
                 //cout << "flux: " << endl;
                 //hp->flux.print();
@@ -198,7 +200,8 @@ public:
                         unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
                         //basic
                         r[0]=r[1]=r[2]=0;
-                        for(int s=0;s<3;++s){
+                        samp = 5;
+                        for(int s=0;s<samp;++s){
                             double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
                             double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
                             V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
@@ -218,6 +221,7 @@ public:
             
             //photontrace(); //更新hitpoints
 
+            #pragma omp parallel for schedule(dynamic, 1) private(r)
             for (int i = 0;i < PPM_EMIT_PHOTONS; ++i) {
                 fprintf(stderr,"\rround %d  emited %5.2f%%",round,100.* i / PPM_EMIT_PHOTONS);
                 unsigned short X[3] = {i + 1, i * i + 10, exp(i) + 100};
@@ -237,8 +241,8 @@ public:
             //cout << "x,y: "<< x << ", " << y << endl;
 
             //img[x * w + y] = img[x * w + y] + hp->flux / (PI * hp->r2 * PPM_EMIT_PHOTONS);
-            img[hp->index] = img[hp->index] + hp->flux / (PI * hp->r2 * PPM_ROUND);
-            //多除以一个PI控制光亮度?
+            img[hp->index] = img[hp->index] + hp->flux / (PI * hp->r2 * PPM_ROUND * PI);
+            //多除以一个PI控制光亮度
             //tmp[x * w + y] += hp->flux / (PI * hp->r2 * PPM_ROUND);
 
 
