@@ -31,3 +31,8 @@
 - [ ] 抗锯齿
 - [ ] 画面脏
 - [ ] 整合
+
+
+# Surface Simplication
+- [ ] he结构
+- [ ] pair selection算法优化
