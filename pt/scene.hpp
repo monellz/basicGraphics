@@ -19,7 +19,7 @@ public:
         //id = -1 只能单独测试相交
         focal = new Plane(-1,V3(0,0,1),FOCAL_DIS,V3(),V3(),DIFF);
         
-        
+        /*        
         //objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-50,V3(),V3(.25,.25,.75),DIFF));  //Back
 
@@ -32,28 +32,18 @@ public:
         objs.push_back(lighter);
         
         //bezier
-        /*
-        double x[] = {-1.5,-34.932,-17.114,-53.07,-75.482,-13.668,-2.101,-52.495,-1.5};
-        double y[] = {-13.388,-11.352,28.102,74.719,74.358,-17.459,-18.544,-23.824,-23.315};
-        */
-        /*
-        double x[] = {-8,-1,-15,15,1,8};
-        double y[] = {8,-1,-7,-7,-1,8};
-        */
         double x[] = {-15,-7,-40,-25,25,40,7,15};
         double y[] = {-15,-50,-55,-60,-60,-55,-50,-15};
         for (int i = 0;i < 8; ++i) y[i] += 55;
         objs.push_back(new Bezier(objs.size(),x,y,8,V3(0,0,0),V3(0.75,0.25,0.25),DIFF));
         
         
-        
-
-
-
 
         lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         objs.push_back(lighter);
-        /*
+        */
+
+
         objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),DIFF));//Left
         objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+99,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght
         objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.75,.75),DIFF));//Back
@@ -64,8 +54,10 @@ public:
         objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas
         lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
         objs.push_back(lighter);
-        */
         
+
+
+
         //--------------obj-----------------
         //objs.push_back(new Triangle(objs.size(),V3(20,60,80),V3(20,40,80),V3(40,40,80),V3(0,0,1),V3(),V3(.25,.25,.95),DIFF));
         //readObj("bezier_mesh.obj");

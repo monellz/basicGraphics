@@ -118,7 +118,7 @@ public:
         //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
 
 
-        //#pragma omp parallel for schedule(dynamic, 1) private(r)
+        #pragma omp parallel for schedule(dynamic, 1) private(r)
         for(int y = 0;y < h; ++y) {
             fprintf(stderr,"\rUsing %d spp  %5.2f%%",samp*4,100.*y/h);
             for(int x=0;x<w;++x){
@@ -151,8 +151,8 @@ public:
                             r += radiance(Ray(origin,(pos - origin).norm()),0,X);
                         }
                         #endif
-                        img[y*w+x]+=(r/samp).clamp()/4;
-                        //img[y * w + x] += (r / samp) / 4;
+                        //img[y*w+x]+=(r/samp).clamp()/4;
+                        img[y * w + x] += (r / samp) / 4;
                     }
             
             
@@ -160,7 +160,7 @@ public:
         }
 
         
-        /*
+        
         #pragma omp parallel for schedule(dynamic, 1) private(r)
         for (int y = 0;y < h; ++y) {
             fprintf(stderr,"\rray marching  %5.2f%%",100.*y/h);
@@ -171,7 +171,7 @@ public:
                 Ray ray(cam.o + d * 120, d);
                 if(!scene->findNearest_naive(ray,result)) continue;
 
-                
+                /*
                 //积分计算体积光
                 //V3 q = ray.o - ((Sphere*)scene->getObj(3))->o;
                 V3 q = ray.o - scene->lighter->o;
@@ -187,11 +187,12 @@ public:
 
                 img[y * w + x] += l * factor;
                 img[y * w + x] = img[y * w + x].clamp();
+                */
                 
                 
                 //直接计算
                 const int stepNum = 100;
-                const double e = 20;
+                const double e = 1000000;
                 double stepSize = result.t / stepNum;
                 double t = 0;
                 V3 intense;
@@ -199,35 +200,53 @@ public:
                 for (int k = 0;k < stepNum; ++k) {
                     V3 p = ray.pos(t);
                    
+
+                    /*
                     Intersection tmp_res;
                     if (scene->findNearest_naive(Ray(p,scene->lighter->o - p),tmp_res)) {
+                        cout << "cross id: " << tmp_res.id << endl;
+                        if (tmp_res.id != scene->lighter->id) continue;
                         double vlight = e / (p - scene->lighter->o).len();
-                        l += vlight;
+
+                        //HG公式计算系数
+                        double g = 0.5;
+                        double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
+                        double tmp = (1 + g * g - 2 * g * costheta);
+                        double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
+                        cout << "hg: " << hg << endl;
+
+
+                        l += vlight  * hg;
                     }
                     t += stepSize;
+                    */
+                    
                     
                     for (int s = 0; s < 10; ++s) {
                         Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
                         Intersection tmp;
                         if (scene->findNearest_naive(r,tmp)) {
-                            if (tmp.id == scene->objs.size() - 1) {
-                                double vlight = e / (p - scene->lighter->o).len();
-                                l += vlight / 10;
+                            if (tmp.id == scene->lighter->id) {
+                                double vlight = e / (p - scene->lighter->o).len2();
+                                //HG公式计算系数
+                                double g = 0.5;
+                                double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
+                                double tmp = (1 + g * g - 2 * g * costheta);
+                                double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
+                                //cout << "hg: " << hg << endl;
+                                l += vlight / 10 * hg;
                             }
                         }
                     }
                     t += stepSize;
+                    
                 }
- 
-                double ctheta = (ray.o - scene->lighter->o).norm().dot(ray.d);
-                double g = 0.1;
-                double factor = 1 / ( 4 * PI) * (1 - g * g) / pow(1 + g * g - 2 * g * ctheta,1.5);               
-
-                img[y * w + x] += l * factor;
+                //cout << "add l: " << l << endl;
+                img[y * w + x] += l;
                 img[y * w + x] = img[y * w + x].clamp();
             }
         }
-        */
+        
     }
 
     
@@ -306,7 +325,7 @@ public:
 
         #pragma omp parallel for schedule(dynamic, 1) private(r)
         for(int y=0;y<h;++y){
-            fprintf(stderr,"\rUsing %d spp  %5.2f%%",samp*4,100.*y/h);
+            fprintf(stderr,"\rpm rendering %d samp  %5.2f%%",samp*4,100.*y/h);
             for(int x=0;x<w;++x){
                 
                 //有明显锯齿
