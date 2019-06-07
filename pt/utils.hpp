@@ -6,6 +6,7 @@
 #include <cmath>
 
 #define EPS (1e-6)
+#define INF (1e20)
 //#define PI (acos(-1))
 #define PI (3.14159265358979323846)
 
@@ -44,6 +45,11 @@ const double _maxpos = 1000;
 //#define DEPTH
 #define FOCAL_RAD 5  //景深随机圆盘取点半径
 #define FOCAL_DIS 78
+
+//BEZIER
+#define MAX_CONTROL 12
+#define MAX_NEWTON_ITER 10
+#define MAX_RAND_SEED 20
 
 
 #endif

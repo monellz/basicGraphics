@@ -23,14 +23,12 @@ struct Bezier2D {
         y = new double[num];
         dx = new double[num - 1]; //导数曲线少一个控制点
         dy = new double[num - 1];
-        x_buf = new double[num];
-        y_buf = new double[num];
         memcpy(x,x_,sizeof(double) * num);
         memcpy(y,y_,sizeof(double) * num);
 
 
         //预处理导数
-        for (int i = 0;i < num - 2; ++i) {
+        for (int i = 0;i < num - 1; ++i) {
             dx[i] = (num - 1) * (x[i + 1] - x[i]);
             dy[i] = (num - 1) * (y[i + 1] - y[i]);
         }
@@ -48,6 +46,9 @@ struct Bezier2D {
     }
 
     V3 pos(double t) {
+        //改为私有
+        double x_buf[MAX_CONTROL];
+        double y_buf[MAX_CONTROL];
         memcpy(x_buf, x, sizeof(double) * num);
         memcpy(y_buf, y, sizeof(double) * num);
         for (int k = 1; k < num; ++k) {
@@ -61,7 +62,10 @@ struct Bezier2D {
 
     //切向量
     V3 dir(double t) {
+        //改为私有
         //使用低阶de casteljau
+        double x_buf[MAX_CONTROL];
+        double y_buf[MAX_CONTROL];
         memcpy(x_buf, dx, sizeof(double) * (num - 1));
         memcpy(y_buf, dy, sizeof(double) * (num - 1));
         for (int k = 1; k < num - 1; ++k) {
@@ -78,8 +82,6 @@ struct Bezier2D {
         delete [] y;
         delete [] dx;
         delete [] dy;
-        delete [] x_buf;
-        delete [] y_buf;
     }
 
 };
@@ -93,6 +95,7 @@ public:
     
     bool intersect(const Ray& r, Intersection& res) override {
         V3 seed;
+
         //seed = (u,v,t)
         bool converge = newton(r,seed);
         if (!converge) return false;
@@ -124,38 +127,185 @@ public:
 
     V3 normal(double u,double v) {
         V3 des = curve.dir(u);
-        V3 p = this->pos(u,v);
+        V3 p = curve.pos(u);
         double sin2pv = sin(2 * PI * v);
         double cos2pv = cos(2 * PI * v);
-        double a = des.y * 2 * PI * cos2pv * p.z;
-        double b = (-2 * PI) * (sin2pv * sin2pv * des.z * p.x + cos2pv * cos2pv * des.x * p.z);
-        double c = 2 * PI * sin2pv * des.y;
+        double a = des.y * 2 * PI * cos2pv * p.x;
+        double b = -2 * PI * des.x * p.x;
+        double c = 2 * PI * sin2pv * p.x * des.y;
         return V3(a,b,c).norm();
     }
+
+    V3 F(const Ray& r, const V3& seed) {
+        //F(u,v,t) = S(u,v) - L(t)
+        return pos(seed.x,seed.y) - r.pos(seed.z);
+    }
+
+    M3 F_jacobi(const Ray& r, const V3& seed) {
+        V3 des = curve.dir(seed.x);
+        V3 cp = curve.pos(seed.x);
+        
+        double sin2pv = sin(2 * PI * seed.y);
+        double cos2pv = cos(2 * PI * seed.y);
+        //列向量
+        V3 c0(des.x * cos2pv, des.y, des.x * sin2pv);
+        V3 c1(-2 * PI * sin2pv * cp.x, 0 , 2 * PI * cos2pv * cp.x);
+        V3 c2 = r.d * (-1);
+        return M3(c0,c1,c2);
+    }
+
+    M3 F_jacobi(const Ray& r, double u, double v, double t) {
+        V3 des = curve.dir(u);
+        V3 cp = curve.pos(u);
+        
+        double sin2pv = sin(2 * PI * v);
+        double cos2pv = cos(2 * PI * v);
+        //列向量
+        V3 c0(des.x * cos2pv, des.y, des.x * sin2pv);
+        V3 c1(-2 * PI * sin2pv * cp.x, 0 , 2 * PI * cos2pv * cp.x);
+        V3 c2 = r.d * (-1);
+        return M3(c0,c1,c2);
+    }
+
 
     bool newton(const Ray& r,V3& seed) {
         //初值u,v,t  解出精确解  牛顿迭代法
         //S(u,v) - L(t) = 0  解u,v,t
-        V3 last;
-        for (int i = 0;i < 6; ++i) {
-            last = seed;
-            V3 des = curve.dir(seed.x);
-            V3 cp = curve.pos(seed.x);
-            V3 c0(cos(2 * PI * seed.y) * des.x, des.y, sin(2 * PI * seed.y) * des.z);
-            V3 c1(-2 * PI * sin(2 * PI *seed.y) * cp.x, 0 ,2 * PI * cos(2 * PI * seed.y) * cp.z);
-            V3 c2 = r.d * (-1);
+        //std::cout << "------start-newton------" << std::endl;
+        
+        //跟aabb相交测试
+        double tmin[3],tmax[3];
+        std::pair<V3, V3> box = this->aabb();
+        for (int i = 0;i < 3; ++i) {
+            if (fabs(r.d[i]) > EPS) {
+                double t1 = (box.first[i] - r.o[i]) / r.d[i];
+                double t2 = (box.second[i] - r.o[i]) / r.d[i];
+                tmin[i] = min(t1,t2);
+                tmax[i] = max(t1,t2);
+            } else {
+                tmin[i] = INF;
+                tmax[i] = 2 * INF;
+            }
+        }
 
-            M3 m(c0,c1,c2);
+        double tmin_ = max(tmin[0],tmin[1],tmin[2]);
+        double tmax_ = min(tmax[0],tmax[1],tmax[2]);
+
+        if (tmin_ >= tmax_) return false;
+
+        double u[MAX_RAND_SEED], v[MAX_RAND_SEED], t[MAX_RAND_SEED];
+        bool is_intersect[MAX_RAND_SEED] = {false};
+        int valid_num = 0;
+        
+        for (int i = 0;i < MAX_RAND_SEED; ++i) {
+            unsigned short X[3]={i + 1, i * i + 2, i * i * i + 3};
+            u[i] = 2 * PI * i / MAX_RAND_SEED;
+            v[i] = erand48(X);
+            t[i] = (tmax_ - tmin_) * erand48(X) + tmin_;
+
+            //牛顿迭代法
+            for (int k = 0;k < MAX_NEWTON_ITER; ++k) {
+                V3 f = this->pos(u[i],v[i]) - r.pos(t[i]);
+                M3 jacobi = this->F_jacobi(r,u[i],v[i],t[i]);
+
+                double det = jacobi.det();
+
+                if (fabs(det) < EPS || fabs(det) > 1e15 || fabs(f.len()) < EPS) break;
+
+                M3 rev = jacobi.reverse();
+                
+                V3 error = rev.dot(f);
+
+                u[i] -= error[0];
+                v[i] -= error[1];
+                t[i] -= error[2];
+            }
+
+            double delta = (this->pos(u[i],v[i]) - r.pos(t[i])).len();
+            if (fabs(delta) < EPS && u[i] >= 0 && u[i] <= 1 && t[i] > 0) {
+                is_intersect[i] = true;
+                valid_num++;
+            } else {
+                is_intersect[i] = false;
+            }
+
+        }
+
+        //if (valid_num > 0) std::cout << "valid_num: " << valid_num << std::endl;
+
+        //找t最小值
+        double t_final = INF;
+        for (int i = 0;i < MAX_RAND_SEED; ++i) {
+            if (is_intersect[i] && t[i] < t_final && t[i] > EPS) {
+                t_final = t[i];
+                seed.x = u[i];
+                seed.y = v[i];
+                seed.z = t[i];
+            }
+        }
+
+        if (t_final < INF) return true;
+        else return false;
+        /*
+        seed = V3(0.5,0.5,100);
+
+        for (int i = 0;i < 15; ++i) {
             
-            seed = seed - m.reverse().dot(pos(seed.x,seed.y) - r.pos(seed.z));
+            //std::cout << "round " << i << std::endl;
+            //std::cout << "seed: " << std::endl;
+            //seed.print();
+            
+            //f(u,v,t) = S(u,v,t) - L(t)
+            V3 f = this->F(r,seed);
+            //std::cout << "F(u,v,t) : " << std::endl;
+            //f.print();
+            //if (f.len() > 1e30) return false;
+            M3 jacobi = this->F_jacobi(r,seed);
+
+            double det = jacobi.det();
+            //std::cout << "jacobi det: " << det << std::endl;
+            
+            if (fabs(det) < EPS || fabs(det) > 1e15) {
+                //std::cout << "det too small break" << std::endl;
+                break;
+            }
+
+            M3 rev = jacobi.reverse();
+            
+            M3 unit = rev * jacobi;
+            std::cout << "--------------" << std::endl;
+            jacobi.print();
+            rev.print();
+            unit.print();
+            getchar();
+            std::cout << "-------------" << std::endl;
+            
+            //std::cout << "jacobi reverse:" << std::endl;
+            //rev.print();
+           
+            //x_{i + 1} = x_i - \frac {F(x_i)} / {F_derivate(x_i)}
+            seed = seed - rev.dot(f);
         }
                 
-
         //判断迭代结果是否收敛
-        double delta = (last - seed).len2();
-        std::cout << "tolerance: " << delta << std::endl;
-        if (delta > EPS) return false;
-        if (seed.x < 0 || seed.x > 1 || seed.y < 0 || seed.y > 1 || seed.z < 0 || seed.z > 1) return false;
+        //seed.print();
+        
+        double delta = this->F(r,seed).len();
+        
+        //std::cout << "tolerance: " << delta << std::endl;
+        //std::cout << "------end-------" << std::endl;
+        
+        if (fabs(delta) > EPS) return false;
+        //if (seed.x < 0 || seed.x > 1 || seed.y < 0 || seed.y > 1 || seed.z < 0) return false;
+        if (seed.x < 0 || seed.x > 1 || seed.z < 0) return false;
+        
+        std::cout << "cross!!! delta: " << delta << std::endl;
+        std::cout << "seed: " << std::endl;
+        seed.print();
+        std::cout << "f(u,v,t) = " << std::endl;
+        V3 f = this->F(r,seed);
+        f.print();
+        */
         return true;
     }
 
@@ -163,8 +313,14 @@ public:
     std::pair<V3,V3> aabb() const override {
         double x = max(fabs(curve.minX),fabs(curve.maxX));
         double y = max(fabs(curve.minY),fabs(curve.minY));
+        /*
+        std::cout << "--bezier   aabb---" << std::endl;
+        std::cout << x << ", " << y << ", " << std::endl;
+        std::cout << "-----------aabb---" << std::endl;
+        */
 
-        return std::make_pair(V3(-x,-y,-x),V3(x,y,x));
+        //return std::make_pair(V3(-x,curve.minY,-x),V3(x,curve.maxY,x));
+        return std::make_pair(V3(-x,-x,-x),V3(x,x,x));
     }
 
     void mesh() {
@@ -193,7 +349,7 @@ public:
         }
 
         //写文件
-        FILE* fp = fopen("besizer_mesh.obj","w");
+        FILE* fp = fopen("bezier_mesh.obj","w");
         for (int i = 1;i < points.size(); ++i) {
             fprintf(fp,"v %f %f %f\n", points[i].x,points[i].y,points[i].z);
         }

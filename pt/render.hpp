@@ -118,7 +118,7 @@ public:
         //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
 
 
-        #pragma omp parallel for schedule(dynamic, 1) private(r)
+        //#pragma omp parallel for schedule(dynamic, 1) private(r)
         for(int y = 0;y < h; ++y) {
             fprintf(stderr,"\rUsing %d spp  %5.2f%%",samp*4,100.*y/h);
             for(int x=0;x<w;++x){

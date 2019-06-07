@@ -160,12 +160,15 @@ struct M3 {
             exit(0);
             d = EPS;
         }
+        if (fabs(d) < EPS) {
+            std::cout << "error !! det too small" << std::endl;
+        }
         double c00 = m[1][1] * m[2][2] - m[2][1] * m[1][2];
         double c01 = m[0][2] * m[2][1] - m[0][1] * m[2][2];
         double c02 = m[0][1] * m[1][2] - m[0][2] * m[1][1];
         double c10 = m[1][2] * m[2][0] - m[1][0] * m[2][2];
         double c11 = m[0][0] * m[2][2] - m[2][0] * m[0][2];
-        double c12 = m[0][0] * m[1][2] - m[0][2] * m[1][0];
+        double c12 = m[1][0] * m[0][2] - m[0][0] * m[1][2];
         double c20 = m[1][0] * m[2][1] - m[1][1] * m[2][0];
         double c21 = m[0][1] * m[2][0] - m[0][0] * m[2][1];
         double c22 = m[0][0] * m[1][1] - m[1][0] * m[0][1];
@@ -174,18 +177,41 @@ struct M3 {
     }
 
     void print() const {
-        std::cout << m[0][0] << " " << m[1][0] << " " << m[2][0] << std::endl;
-        std::cout << m[0][1] << " " << m[1][1] << " " << m[2][1] << std::endl;
-        std::cout << m[0][2] << " " << m[1][2] << " " << m[2][2] << std::endl;
+        printf("\n");
+        printf("%8.4f  %8.4f  %8.4f\n",m[0][0],m[1][0],m[2][0]);
+        printf("%8.4f  %8.4f  %8.4f\n",m[0][1],m[1][1],m[2][1]);
+        printf("%8.4f  %8.4f  %8.4f\n",m[0][2],m[1][2],m[2][2]);
+        printf("\n");
     }
 
     V3 operator*(const V3& v) const {
-        return V3(m[0].dot(v), m[1].dot(v), m[2].dot(v));
+        //转成行向量
+        V3 r0(m[0][0],m[1][0],m[2][0]);
+        V3 r1(m[0][1],m[1][1],m[2][1]);
+        V3 r2(m[0][2],m[1][2],m[2][2]);
+        
+        return V3(r0.dot(v), r1.dot(v),r2.dot(v));
     }
 
     V3 dot(const V3& v) const {
         return *this * v;
     }
+
+    M3 operator*(const M3& matrix) const {
+        V3 r[3];
+        r[0] = V3(m[0][0],m[1][0],m[2][0]);
+        r[1] = V3(m[0][1],m[1][1],m[2][1]);
+        r[2] = V3(m[0][2],m[1][2],m[2][2]);
+
+        M3 new_m;
+        for (int i = 0;i < 3; ++i) {
+            for (int j = 0;j < 3; ++j) {
+                new_m[i][j] = r[i].dot(matrix[j]);
+            }
+        }
+        return new_m;
+    }
+
 };
 
 #endif // __UTILS_H__

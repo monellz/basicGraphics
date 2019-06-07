@@ -20,19 +20,33 @@ public:
         focal = new Plane(-1,V3(0,0,1),FOCAL_DIS,V3(),V3(),DIFF);
         
         
-        objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
+        //objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
+        objs.push_back(new Plane(objs.size(),V3(0,0,1),-50,V3(),V3(.25,.25,.75),DIFF));  //Back
+
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
 	    //pos 左右(大的在左),上下(大的在上),前后(大的在前)
-        objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
-        objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
         objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5 + 10,78),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
         lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         objs.push_back(lighter);
         
         //bezier
+        /*
         double x[] = {-1.5,-34.932,-17.114,-53.07,-75.482,-13.668,-2.101,-52.495,-1.5};
         double y[] = {-13.388,-11.352,28.102,74.719,74.358,-17.459,-18.544,-23.824,-23.315};
-        objs.push_back(new Bezier(0,x,y,9,V3(0,0,0),V3(1,1,1) * 0.99,SPEC));
+        */
+        /*
+        double x[] = {-8,-1,-15,15,1,8};
+        double y[] = {8,-1,-7,-7,-1,8};
+        */
+        double x[] = {-15,-7,-40,-25,25,40,7,15};
+        double y[] = {-15,-50,-55,-60,-60,-55,-50,-15};
+        for (int i = 0;i < 8; ++i) y[i] += 55;
+        objs.push_back(new Bezier(objs.size(),x,y,8,V3(0,0,0),V3(0.75,0.25,0.25),DIFF));
+        
+        
+        
 
 
 
@@ -78,6 +92,7 @@ public:
                 istringstream in(s);
                 in >> type >> x >> y >> z;
                 buf.push_back(V3(x + 30,y + 30,z + 20));
+                //buf.push_back(V3(x,y,z));
             } else if (s[0] == 'f') {
                 //面
                 int i,j,k;
