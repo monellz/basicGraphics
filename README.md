@@ -9,7 +9,7 @@
 ## Path Tracing
 
 - [x] 纹理映射 19.05.16
-- [ ] Besizer曲线
+- [x] Besizer曲线 19.06.07
 - [ ] cube
 - [x] kd树 19.05.19
 - [ ] 优化kd树
