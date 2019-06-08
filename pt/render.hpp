@@ -254,8 +254,13 @@ public:
                             r += radiance(Ray(origin,(pos - origin).norm()),0,X);
                         }
                         #endif
-                        //img[y * w + x] += (r / samp).clamp() / 4;
+
+
+                        #ifdef GOD_RAY
                         img[y * w + x] += (r / samp) / 4;
+                        #else
+                        img[y * w + x] += (r / samp).clamp() / 4;
+                        #endif
                     }
                 } 
             
@@ -264,8 +269,7 @@ public:
 
         
         //体积光 ray march        
-        //return;
-        createShadowMap();
+        #ifdef GOD_RAY
         #pragma omp parallel for schedule(dynamic, 1) private(r)
         for (int y = 0;y < h; ++y) {
             fprintf(stderr,"\rray marching  %5.2f%%",100.*y/h);
@@ -279,7 +283,7 @@ public:
                 //直接计算
                 const int stepNum = 100;
                 //const double e = 1000000; //basic
-                const double e = 100000;
+                const double e = 1000;
                 double stepSize = result.t / stepNum;
                 double t = 0;
                 V3 intense;
@@ -289,9 +293,6 @@ public:
                    
 
                     for (int s = 0; s < GOD_RAY_SAMP; ++s) {
-
-                        
-                                                
                         //直接求交检查是否可见
                         //Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
                         V3 d(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1);
@@ -312,7 +313,6 @@ public:
                                 l += vlight / GOD_RAY_SAMP * hg;
                             }
                         }
-                        
                         
                         //使用radiance计算
                         /*
@@ -397,6 +397,7 @@ public:
                 img[y * w + x] = img[y * w + x].clamp();
             }
         }
+        #endif
         
         
     }

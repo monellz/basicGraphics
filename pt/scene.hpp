@@ -13,6 +13,7 @@ public:
     std::vector<Object*> objs;
     kdTree* tree;
     Sphere* lighter;
+    Sphere* lighter2;
     Plane* focal; //焦平面
     Scene(){
         srand(time(0));
@@ -43,8 +44,10 @@ public:
         objs.push_back(lighter);
         */
 
-        
+        //原始       
+        /*
         objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),DIFF));//Left
+        //objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+99,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght
         objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.75,.75),DIFF));//Back
         //objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8,-1e5+170), V3(),V3(),           DIFF));//Frnt
@@ -55,9 +58,30 @@ public:
         //lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
         lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
         objs.push_back(lighter);
+        */
         
+        objs.push_back(new Plane(objs.size(),V3(0,0,1),-10,V3(),V3(.25,.25,.75),DIFF));  //Back
+        objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF)); //botm
 
-        //objs.push_back(new Sphere(objs.size(),100, V3(50,400, 100),V3(1,1,1) * 100, V3(),DIFF));
+        //objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),DIFF));//Left
+        objs.push_back(new Plane(objs.size(), V3(1,0,0),0,V3(), V3(0.75, 0.25, 0.25), DIFF)); //left
+        //objs.push_back(new Plane(objs.size(), V3(1,0,0),130,V3(), V3(0.25, 0.25, 0.75), DIFF)); //right
+        objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+130,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.75,.75),DIFF));//Back
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8,-1e5+170), V3(),V3(),           DIFF));//Frnt
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(50, 1e5, 81.6),    V3(),V3(.75,.75,.75),DIFF));//Botm
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+81.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+83.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top
+        objs.push_back(new Plane(objs.size(),V3(-0.2,1,0),105,V3(),V3(.75,.75,.75),DIFF));  //Top
+        objs.push_back(new Plane(objs.size(),V3(0,1,0),112,V3(),V3(.75,.75,.75),DIFF));  //Top2
+
+        objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr
+        objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas
+        //lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
+        lighter = new Sphere(objs.size(), 30, V3(19,138,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
+        //lighter2 = new Sphere(objs.size(), 30, V3(85,137,80),V3(1,1,1) * 12,  V3(), DIFF);//Lite
+        objs.push_back(lighter);
+        //objs.push_back(lighter2);
  
 
         //--------------obj-----------------
