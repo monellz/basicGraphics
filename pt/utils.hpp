@@ -52,4 +52,8 @@ const double _maxpos = 1000;
 #define MAX_RAND_SEED 20
 
 
+//shadow map 体积光用
+#define SHADOW_SPLIT_NUM 1000
+#define GOD_RAY_SAMP 10
+
 #endif

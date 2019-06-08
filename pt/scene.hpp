@@ -38,29 +38,34 @@ public:
         objs.push_back(new Bezier(objs.size(),x,y,8,V3(0,0,0),V3(0.75,0.25,0.25),DIFF));
         
         
-
+        
         lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         objs.push_back(lighter);
         */
 
-
+        
         objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),DIFF));//Left
         objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+99,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght
         objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.75,.75),DIFF));//Back
-        objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8,-1e5+170), V3(),V3(),           DIFF));//Frnt
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8,-1e5+170), V3(),V3(),           DIFF));//Frnt
         objs.push_back(new Sphere(objs.size(),1e5, V3(50, 1e5, 81.6),    V3(),V3(.75,.75,.75),DIFF));//Botm
         objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+81.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top
-        objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr
-        objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas
+        //lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
         lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
         objs.push_back(lighter);
         
 
-
+        //objs.push_back(new Sphere(objs.size(),100, V3(50,400, 100),V3(1,1,1) * 100, V3(),DIFF));
+ 
 
         //--------------obj-----------------
         //objs.push_back(new Triangle(objs.size(),V3(20,60,80),V3(20,40,80),V3(40,40,80),V3(0,0,1),V3(),V3(.25,.25,.95),DIFF));
         //readObj("bezier_mesh.obj");
+        //readObj("temple.obj");
+        //readObj("room.obj");
+        readObj("Alucy_adjust.obj");
 
         std::cout << "obj total: " << objs.size() << std::endl;
         std::cout << "build tree" << std::endl;
@@ -83,16 +88,16 @@ public:
                 std::string type;
                 istringstream in(s);
                 in >> type >> x >> y >> z;
-                buf.push_back(V3(x + 30,y + 30,z + 20));
-                //buf.push_back(V3(x,y,z));
+                //buf.push_back(V3(x + 30,y + 30,z + 20));
+                buf.push_back(V3(x,y,z) + V3(21,0,60));
             } else if (s[0] == 'f') {
                 //面
                 int i,j,k;
                 istringstream in(s);
                 std::string type;
                 in >> type >> i >> j >> k;
-                //objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.85,.25,.25), REFR));        
-                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(1,1,1)*0.99, REFR));        
+                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.25,.25,.25), DIFF));        
+                //objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(1,1,1)*0.99, REFR));        
                 //if (objs.size() > 500) break;
             } else {
                 std::cout << s << endl;

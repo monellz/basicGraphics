@@ -37,25 +37,99 @@ public:
 
 class PT: public Render {
 private:
-    int checkShadow(const V3& pos) {
-        Ray r(pos,scene->lighter->o - pos);
-        Intersection res;
-        if (!scene->findNearest_naive(r,res)) return 0;
-        if (res.id != scene->objs.size() - 1) return 0;
-        return 1;
-    }
-    V3 raymarch(const Ray& ray, const V3& pos) {
-        //samp = 1000
-        double steplength = (pos - ray.o).len() / 1000;
-        V3 color;
-        for (int i = 0;i < 1000; ++i) {
-            double shadow = (double)checkShadow(ray.pos(steplength));
-            color += V3(0.5,0.5,0.5) * shadow * steplength / (10 * 0.5);
-            color *= exp( - 0.2 * steplength);
+    double shadowmap[SHADOW_SPLIT_NUM][SHADOW_SPLIT_NUM];
+
+    double checkDepth(double theta, double fai) {
+        //返回这一点的深度
+        //二分搜索
+
+        double dtheta = PI / SHADOW_SPLIT_NUM;
+        double dfai = 2 * PI / SHADOW_SPLIT_NUM;
+
+        int lo = 0, mid;
+        int half, len = SHADOW_SPLIT_NUM;
+        while (len > 0) {
+            half = len >> 1;
+            mid = lo + half;
+            if (mid * dtheta < theta) {
+                lo = mid + 1;
+                len = len - half - 1; //在右边序列中查找
+            } else len = half; //左边序列
         }
-        return color;
+
+        int i = lo;
+
+        lo = 0;
+        len = SHADOW_SPLIT_NUM;
+        while (len > 0) {
+            half = len >> 1;
+            mid = lo + half;
+            if (mid * dfai < fai) {
+                lo = mid + 1;
+                len = len - half - 1;
+            } else len = half;
+        }
+
+        int j = lo;
+
+        return shadowmap[i][j]; //basic
+        //return shadowmap[i + 1][j + 1];
     }
-    V3 radiance(const Ray&r, int dep,unsigned short *X){
+
+    void createShadowMap() {
+        /*
+        只考虑球光源
+        方向(theta, fai) 到深度的map
+
+        坐标转换
+        (x,y,z) = (sin theta * cos fai, sin theta * sin fai, cos theta)
+        (theta, fai) = (acos(z), atan(y / x))
+
+        theta \in [0, pi] 
+        fai \in [0, 2pi]
+
+        将theta,fai均分
+        */
+
+        cout << "create shadow map" << endl;
+        double dtheta = PI / SHADOW_SPLIT_NUM;
+        double dfai = 2 * PI / SHADOW_SPLIT_NUM;
+
+        //预处理sin cos
+        double cosk[SHADOW_SPLIT_NUM];
+        double sink[SHADOW_SPLIT_NUM];
+        double cos2k[SHADOW_SPLIT_NUM];
+        double sin2k[SHADOW_SPLIT_NUM];
+        for (int i = 0;i < SHADOW_SPLIT_NUM; ++i) {
+            cosk[i] = cos(i * dtheta);
+            sink[i] = sin(i * dtheta);
+            cos2k[i] = cos(i * dfai);
+            sin2k[i] = sin(i * dfai);
+        }
+        for (int i = 0;i < SHADOW_SPLIT_NUM; ++i) {
+            for (int j = 0;j < SHADOW_SPLIT_NUM; ++j) {
+                //测试深度
+                V3 d(sink[i] * cos2k[j], sink[i] * sin2k[j], cosk[i]);
+                //V3 d(sin(i * dtheta) * cos(j * dfai), sin(i * dtheta) * sin(j * dfai), cos(i * dtheta));
+                //V3 o = scene->lighter->o + d * (scene->lighter->rad + EPS);
+                V3 o = scene->lighter->o + d * (scene->lighter->rad);
+                Ray r(o,d);
+
+                Intersection res;
+                if (scene->findNearest_naive(r,res)) {
+                    //计算光源到碰撞点的深度
+                    shadowmap[i][j] = (r.pos(res.t) - scene->lighter->o).len();
+                } else {
+                    //没有交点 深度无穷
+                    shadowmap[i][j] = INF;
+                }
+            }
+        }
+               
+    }
+
+
+    V3 radiance(const Ray&r, int dep,unsigned short *X, int maxdepth = 1000){
         Intersection res;
         if(!scene->findNearest_naive(r,res))return V3();
         Object* obj = scene->getObj(res.id);
@@ -69,7 +143,8 @@ private:
         //nl 入射光对应法向量
 
         double p=f.max();
-        if(++dep> 5)
+        if (dep > maxdepth) return obj->material.e;
+        if(++dep > 5)
             if(erand48(X)<p) f/=p;
             //if(erand48(X)<p) f = f;
             else return obj->material.e;
@@ -109,31 +184,59 @@ public:
 
     void rendering() override {
         Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
-        //Ray cam(V3(-5,32,280), V3(0.15,-0.05,-1).norm()); 
-        //Ray cam(V3(-5,50,280), V3(0.15,-0.15,-1).norm()); 
+        //Ray cam(V3(70,32,180), V3(-0.15,0.05,-1).norm()); 
+        //Ray cam(V3(-170,6,80), V3(2.55,0.05,-1).norm()); 
+        //Ray cam(V3(70,32,280), V3(-0.6,0.05,-1).norm()); 
 
         double fr = 0.5; //basic
 
-        V3 cx=V3(w*fr/h), cy=(cx&cam.d).norm()* fr, r;
+        V3 cx=V3(w*fr/h), cy=(cx&cam.d).norm()* fr, r; //basic
         //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
 
 
+        //渐进式 无景深
+        /*
+        for (int s = 0;s < samp; ++s) {
+            #pragma omp parallel for schedule(dynamic, 1) private(r)
+            for (int y = 0;y < h; ++y) {
+                for (int x = 0;x < w; ++x) {
+                    for (int sy = 0;sy < 2; ++sy) {
+                        for (int sx = 0;sx < 2; ++sx) {
+                            unsigned short X[3] = {y + sx + 1, y * x + sy, y * x * y + sx * sy};
+                            double r1 = 2 * erand48(X), dx = r1 < 1? sqrt(r1): 2 - sqrt(2 - r1);
+                            double r2 = 2 * erand48(X), dy = r2 < 1? sqrt(r2): 2 - sqrt(2 - r2);
+                            V3 d = cx * ((sx + dx / 2 + x) / w - 0.5) + cy * ((sy + dy / 2 + y) / h - 0.5) + cam.d;
+                            img [y * w + x] += radiance(Ray(cam.o + d * 120, d.norm()), 0 , X);
+                        }
+                    }
+                }
+            }
+        }
+        */
+
+
         #pragma omp parallel for schedule(dynamic, 1) private(r)
-        for(int y = 0;y < h; ++y) {
-            fprintf(stderr,"\rUsing %d spp  %5.2f%%",samp*4,100.*y/h);
-            for(int x=0;x<w;++x){
-                for(int sy=0;sy<2;++sy)
-                    for(int sx=0;sx<2;++sx)
-                    {
-                        unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
+        for (int y = 0; y < h; ++y) {
+            fprintf(stderr,"\rpath tracing  use %d samp  %5.2f%%",samp*4,100.*y/h);
+            for (int x = 0;x < w; ++x) {
+                for (int sy = 0; sy < 2; ++sy) {
+                    for (int sx = 0; sx < 2; ++sx) {
+                        unsigned short X[3] = {y + sx, y * x + sy, y * y * x + sx * sy};
+                        //unsigned short X[3] = {y + sx, x + sy, y * x + sx * sy};
+                        //unsigned short X[3] = {sx * sx + y, x + sy, y * x + sx * sy};
+                        //unsigned short X[3] = {rand() % 10000, rand() % 10000, rand() % 10000};
                         //basic
-                        r[0]=r[1]=r[2]=0;
+                        r[0] = r[1] = r[2] = 0;
                         #ifndef DEPTH
-                        for(int s=0;s<samp;++s){
-                            double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
-                            double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
-                            V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
-                            r+=radiance(Ray(cam.o+d*120,d.norm()),0,X); //basic
+                        for (int s = 0;s < samp; ++s) {
+                            double r1 = 2 * erand48(X), dx = r1 < 1? sqrt(r1): 2 - sqrt(2 - r1);
+                            double r2 = 2 * erand48(X), dy = r2 < 1? sqrt(r2): 2 - sqrt(2 - r2);
+                            V3 d = cx * ((sx + dx / 2 + x) / w - 0.5) + cy * ((sy + dy / 2 + y) / h - 0.5) + cam.d; //basic
+                            //V3 d = cx * ((sx + dx / 2 + x) / w ) + cy * ((sy + dy / 2 + y) / h - 0.5) + cam.d;
+                            //V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
+                            //r+=radiance(Ray(cam.o+d*120,d.norm()),0,X);
+                            //r += radiance(Ray(cam.o + d * 120, d.norm()), 0, X);
+                            r += radiance(Ray(cam.o + d * 110, d.norm()), 0, X);
                         }
                         #else
                         //景深随机取点
@@ -151,48 +254,32 @@ public:
                             r += radiance(Ray(origin,(pos - origin).norm()),0,X);
                         }
                         #endif
-                        //img[y*w+x]+=(r/samp).clamp()/4;
+                        //img[y * w + x] += (r / samp).clamp() / 4;
                         img[y * w + x] += (r / samp) / 4;
                     }
-            
+                } 
             
             }
         }
 
         
-        
+        //体积光 ray march        
+        //return;
+        createShadowMap();
         #pragma omp parallel for schedule(dynamic, 1) private(r)
         for (int y = 0;y < h; ++y) {
             fprintf(stderr,"\rray marching  %5.2f%%",100.*y/h);
             for (int x = 0; x < w; ++x) {
-                unsigned short X[3]={y,y*x,y*x*y};
+                unsigned short X[3]={y + 1 ,y * x + 2, y * x * y + 3};
                 V3 d = cx * (x * 1.0 / w - 0.5) + cy * (y * 1.0 / h - 0.5) + cam.d;
                 Intersection result;
                 Ray ray(cam.o + d * 120, d);
-                if(!scene->findNearest_naive(ray,result)) continue;
+                if(!scene->findNearest_naive(ray,result)) continue; //basic
 
-                /*
-                //积分计算体积光
-                //V3 q = ray.o - ((Sphere*)scene->getObj(3))->o;
-                V3 q = ray.o - scene->lighter->o;
-                double b = ray.d.dot(q);
-                double c = q.dot(q);
-                double iv = 100 / sqrt(c - b * b);
-                double l =iv * (atan((result.t + b) * iv) - atan(b * iv));
-
-
-                double ctheta = q.norm().dot(ray.d);
-                double g = 0.1;
-                double factor = 1 / ( 4 * PI) * (1 - g * g) / pow(1 + g * g - 2 * g * ctheta,1.5);
-
-                img[y * w + x] += l * factor;
-                img[y * w + x] = img[y * w + x].clamp();
-                */
-                
-                
                 //直接计算
                 const int stepNum = 100;
-                const double e = 1000000;
+                //const double e = 1000000; //basic
+                const double e = 100000;
                 double stepSize = result.t / stepNum;
                 double t = 0;
                 V3 intense;
@@ -201,30 +288,18 @@ public:
                     V3 p = ray.pos(t);
                    
 
-                    /*
-                    Intersection tmp_res;
-                    if (scene->findNearest_naive(Ray(p,scene->lighter->o - p),tmp_res)) {
-                        cout << "cross id: " << tmp_res.id << endl;
-                        if (tmp_res.id != scene->lighter->id) continue;
-                        double vlight = e / (p - scene->lighter->o).len();
+                    for (int s = 0; s < GOD_RAY_SAMP; ++s) {
 
-                        //HG公式计算系数
-                        double g = 0.5;
-                        double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
-                        double tmp = (1 + g * g - 2 * g * costheta);
-                        double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
-                        cout << "hg: " << hg << endl;
-
-
-                        l += vlight  * hg;
-                    }
-                    t += stepSize;
-                    */
-                    
-                    
-                    for (int s = 0; s < 10; ++s) {
-                        Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
+                        
+                                                
+                        //直接求交检查是否可见
+                        //Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
+                        V3 d(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1);
+                        V3 origin = p + d / w;
+                        //Ray r(p,scene->lighter->o - p);
+                        Ray r(origin,scene->lighter->o - origin);
                         Intersection tmp;
+
                         if (scene->findNearest_naive(r,tmp)) {
                             if (tmp.id == scene->lighter->id) {
                                 double vlight = e / (p - scene->lighter->o).len2();
@@ -234,18 +309,95 @@ public:
                                 double tmp = (1 + g * g - 2 * g * costheta);
                                 double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
                                 //cout << "hg: " << hg << endl;
-                                l += vlight / 10 * hg;
+                                l += vlight / GOD_RAY_SAMP * hg;
                             }
                         }
+                        
+                        
+                        //使用radiance计算
+                        /*
+                        Ray r(p,scene->lighter->o - p);
+                        V3 radi = radiance(r,0,X,2);
+                        if (radi.len2() > EPS) {
+                            double vlight = e / (p - scene->lighter->o).len2();
+                            //HG公式计算系数
+                            double g = 0.5;
+                            double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
+                            double tmp = (1 + g * g - 2 * g * costheta);
+                            double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
+                            //cout << "hg: " << hg << endl;
+                            l += vlight / 10 * hg;
+                        }
+                        
+                        */
+
+                        /*
+                        //使用shadow map检查可见
+                        //计算深度
+                        if (erand48(X) > 1.0 / 10) continue;
+                        double depth = (p - scene->lighter->o).len();
+
+                        //坐标转换(theta, fai) = (acos(z), atan(y / x))
+                        double theta = acos(ray.d.z);
+                        double fai = atan(ray.d.y / ray.d.x); //??除以0?
+
+                        //double real_depth = checkDepth(theta,fai);
+                        //cout << "depth: " << depth << " real_depth: " << real_depth << endl;
+                        if (depth < checkDepth(theta,fai)) {
+                            //可见
+                            double vlight = e / (p - scene->lighter->o).len2();
+                            //HG公式计算系数
+                            double g = 0.5;
+                            double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
+                            double tmp = (1 + g * g - 2 * g * costheta);
+                            double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
+                            //cout << "hg: " << hg << endl;
+                            //l += vlight / 10 * hg;
+                            l += vlight / 10 * hg * stepSize;
+                        }
+                        //否则不可见
+                        */
+                        
                     }
+
+                    /*
+                    //使用shadow map检查可见
+                    //计算深度
+                    double depth = (p - scene->lighter->o).len();
+
+                    //坐标转换(theta, fai) = (acos(z), atan(y / x))
+                    if (x == 667 || x == 666) cout << "ray.d.z: " << ray.d.z << "   y/x: " << ray.d.y / ray.d.x << endl;
+                    double theta = acos(ray.d.z);
+                    double fai = atan(ray.d.y / ray.d.x); //??除以0?
+
+                    double real_depth = checkDepth(theta,fai);
+                    if (depth < checkDepth(theta,fai)) {
+                        //可见
+                        double vlight = e / (p - scene->lighter->o).len2();
+                        //HG公式计算系数
+                        double g = 0.5;
+                        double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
+                        double tmp = (1 + g * g - 2 * g * costheta);
+                        double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
+                        //cout << "hg: " << hg << endl;
+                        //l += vlight / 10 * hg;
+                        l += vlight * hg * stepSize;
+                    }
+                    //否则不可见
+
+                    if (x == 667 || x == 666) {
+                        cout << "x: " << x << " depth: " << depth << " real_depth: " << real_depth << endl;
+                        cout <<  "    l: " << l << endl;
+                    }
+                    */
+
                     t += stepSize;
-                    
                 }
-                //cout << "add l: " << l << endl;
                 img[y * w + x] += l;
                 img[y * w + x] = img[y * w + x].clamp();
             }
         }
+        
         
     }
 
