@@ -9,7 +9,7 @@ public:
     V3 pts[3];
     V3 n; //所指方向为三角片外向 
     Triangle(int id_, V3 p1, V3 p2, V3 p3, V3 n_, V3 e_, V3 c_, Refl_t refl_, double ns_ = 1.5):
-        Object(id_,e_,c_,refl_,ns_),n(n_) {
+        Object(id_,e_,c_,refl_,ns_),n(n_.norm()) {
             pts[0] = p1;
             pts[1] = p2;
             pts[2] = p3;

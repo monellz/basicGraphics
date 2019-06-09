@@ -222,9 +222,6 @@ public:
                 for (int sy = 0; sy < 2; ++sy) {
                     for (int sx = 0; sx < 2; ++sx) {
                         unsigned short X[3] = {y + sx, y * x + sy, y * y * x + sx * sy};
-                        //unsigned short X[3] = {y + sx, x + sy, y * x + sx * sy};
-                        //unsigned short X[3] = {sx * sx + y, x + sy, y * x + sx * sy};
-                        //unsigned short X[3] = {rand() % 10000, rand() % 10000, rand() % 10000};
                         //basic
                         r[0] = r[1] = r[2] = 0;
                         #ifndef DEPTH
@@ -270,7 +267,7 @@ public:
         
         //体积光 ray march        
         #ifdef GOD_RAY
-        #pragma omp parallel for schedule(dynamic, 1) private(r)
+        #pragma omp parallel for schedule(dynamic, 1) 
         for (int y = 0;y < h; ++y) {
             fprintf(stderr,"\rray marching  %5.2f%%",100.*y/h);
             for (int x = 0; x < w; ++x) {
@@ -283,10 +280,9 @@ public:
                 //直接计算
                 const int stepNum = 100;
                 //const double e = 1000000; //basic
-                const double e = 1000;
+                const double e = 50000;
                 double stepSize = result.t / stepNum;
                 double t = 0;
-                V3 intense;
                 double l = 0;
                 for (int k = 0;k < stepNum; ++k) {
                     V3 p = ray.pos(t);

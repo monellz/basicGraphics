@@ -13,36 +13,37 @@ public:
     std::vector<Object*> objs;
     kdTree* tree;
     Sphere* lighter;
-    Sphere* lighter2;
     Plane* focal; //焦平面
     Scene(){
         srand(time(0));
         //id = -1 只能单独测试相交
         focal = new Plane(-1,V3(0,0,1),FOCAL_DIS,V3(),V3(),DIFF);
         
-        /*        
+                
         //objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-50,V3(),V3(.25,.25,.75),DIFF));  //Back
+        //objs.push_back(new Plane(objs.size(),V3(0,0,1),-50,V3(),"sky.jpg",DIFF));  //Back
 
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
 	    //pos 左右(大的在左),上下(大的在上),前后(大的在前)
         //objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
         //objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
-        objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5 + 10,78),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
-        lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
+        //objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5 + 10,78),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+        //lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
+        lighter =new Sphere(objs.size(),30, V3(25,131.6-0.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         objs.push_back(lighter);
+        readObj("glass.obj",V3(45,0,60));
         
         //bezier
+        /*
         double x[] = {-15,-7,-40,-25,25,40,7,15};
         double y[] = {-15,-50,-55,-60,-60,-55,-50,-15};
         for (int i = 0;i < 8; ++i) y[i] += 55;
         objs.push_back(new Bezier(objs.size(),x,y,8,V3(0,0,0),V3(0.75,0.25,0.25),DIFF));
-        
-        
-        
-        lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
-        objs.push_back(lighter);
         */
+        
+        
+        
 
         //原始       
         /*
@@ -60,28 +61,28 @@ public:
         objs.push_back(lighter);
         */
         
+        /*
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-10,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF)); //botm
 
         //objs.push_back(new Sphere(objs.size(),1e5, V3( 1e5+1,40.8,81.6), V3(),V3(.75,.25,.25),DIFF));//Left
         objs.push_back(new Plane(objs.size(), V3(1,0,0),0,V3(), V3(0.75, 0.25, 0.25), DIFF)); //left
-        //objs.push_back(new Plane(objs.size(), V3(1,0,0),130,V3(), V3(0.25, 0.25, 0.75), DIFF)); //right
-        objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+130,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght
+        objs.push_back(new Plane(objs.size(), V3(1,0,0),100,V3(), V3(0.25, 0.25, 0.75), DIFF)); //right
+        //objs.push_back(new Sphere(objs.size(),1e5, V3(-1e5+130,40.8,81.6),V3(),V3(.25,.25,.75),DIFF));//Rght
         //objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8, 1e5),     V3(),V3(.75,.75,.75),DIFF));//Back
         //objs.push_back(new Sphere(objs.size(),1e5, V3(50,40.8,-1e5+170), V3(),V3(),           DIFF));//Frnt
         //objs.push_back(new Sphere(objs.size(),1e5, V3(50, 1e5, 81.6),    V3(),V3(.75,.75,.75),DIFF));//Botm
         //objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+81.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top
         //objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+83.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top
-        objs.push_back(new Plane(objs.size(),V3(-0.2,1,0),105,V3(),V3(.75,.75,.75),DIFF));  //Top
-        objs.push_back(new Plane(objs.size(),V3(0,1,0),112,V3(),V3(.75,.75,.75),DIFF));  //Top2
+        //objs.push_back(new Plane(objs.size(),V3(0,1,0),81.6,V3(),V3(.75,.75,.75),DIFF));  //Top
+        objs.push_back(new Plane(objs.size(),V3(0,1,0),81.6,V3(),"sky.jpeg",DIFF));  //Top
 
         objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr
         objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas
         //lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
-        lighter = new Sphere(objs.size(), 30, V3(19,138,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
-        //lighter2 = new Sphere(objs.size(), 30, V3(85,137,80),V3(1,1,1) * 12,  V3(), DIFF);//Lite
+        lighter = new Sphere(objs.size(), 400, V3(50,481.6-.5,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
         objs.push_back(lighter);
-        //objs.push_back(lighter2);
+        */
  
 
         //--------------obj-----------------
@@ -89,7 +90,8 @@ public:
         //readObj("bezier_mesh.obj");
         //readObj("temple.obj");
         //readObj("room.obj");
-        readObj("Alucy_adjust.obj");
+        //readObj("Alucy_adjust.obj");
+        //readObj("glass.obj");
 
         std::cout << "obj total: " << objs.size() << std::endl;
         std::cout << "build tree" << std::endl;
@@ -97,7 +99,7 @@ public:
         std::cout << "build tree done" << std::endl;
     }
 
-    void readObj(std::string fn) {
+    void readObj(std::string fn, const V3& bias) {
         //读取obj文件并放入objs中
         std::cout << "reading obj..." << std::endl;
         ifstream ifs(fn);
@@ -113,18 +115,18 @@ public:
                 istringstream in(s);
                 in >> type >> x >> y >> z;
                 //buf.push_back(V3(x + 30,y + 30,z + 20));
-                buf.push_back(V3(x,y,z) + V3(21,0,60));
+                //buf.push_back(V3(x,y,z) + V3(31,0,60)); //Al
+                buf.push_back(V3(x,y,z) + bias);
             } else if (s[0] == 'f') {
                 //面
                 int i,j,k;
                 istringstream in(s);
                 std::string type;
                 in >> type >> i >> j >> k;
-                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.25,.25,.25), DIFF));        
-                //objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(1,1,1)*0.99, REFR));        
-                //if (objs.size() > 500) break;
+                //objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.25,.25,.25), DIFF));        
+                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(1,1,1)*0.99, REFR));        
             } else {
-                std::cout << s << endl;
+                //std::cout << s << endl;
             }
         }
         std::cout << "read done ..." << std::endl;

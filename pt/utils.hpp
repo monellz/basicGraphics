@@ -53,7 +53,7 @@ const double _maxpos = 1000;
 
 
 //shadow map 体积光用
-#define GOD_RAY
+//#define GOD_RAY
 #define SHADOW_SPLIT_NUM 1000
 #define GOD_RAY_SAMP 1
 
