@@ -17,7 +17,7 @@
 
 #define LOOP_INFINIT 100000
 
-#define DEFAULT_THRESHOLD 0.00001
+#define DEFAULT_THRESHOLD 0
 
 template<class T>
 T min(const T& a, const T& b) {
