@@ -40,28 +40,25 @@ public:
         std::cout << "target face num: " << target_face_num << std::endl;
 
         vert2pairMap vert2pair;
-        for (int i = 0;i < heap.size; ++i) {
-            vert2pair[heap.elem[i]->v[0]].insert(heap.elem[i]);
-            vert2pair[heap.elem[i]->v[1]].insert(heap.elem[i]);
-
-            assert(heap.elem[i]->id == i);
-
+        for (int i = 0;i < pairs.size(); ++i) {
+            vert2pair[pairs[i].v[0]].insert(&pairs[i]);
+            vert2pair[pairs[i].v[1]].insert(&pairs[i]);
         }
 
         int round = 0;
         //target_face_num = 18746;
         while (!heap.empty() && mesh.faceCount > target_face_num) {
-            //printf("\rround: %d  face: %d/%lu",round++, mesh.faceCount,mesh.faces.size());
-            printf("round: %d  face: %d/%lu\n",round++, mesh.faceCount,mesh.faces.size());
+            printf("\rround: %d  face: %d/%lu",round++, mesh.faceCount,mesh.faces.size());
+            //printf("round: %d  face: %d/%lu\n",round++, mesh.faceCount,mesh.faces.size());
 
-            mesh.checkTotal();
-            std::cout << "round first check done" << std::endl;
+            //mesh.checkTotal();
+            //std::cout << "round first check done" << std::endl;
             he::Pair* min_cost_pair = heap.pop();
 
             assert(min_cost_pair->edge != nullptr);
             assert(min_cost_pair->edge->id >= 0 && min_cost_pair->edge->id < mesh.edgeEnable.size());
             if (mesh.edgeEnable[min_cost_pair->edge->id] == false) {
-                std::cout << "   not delete" << std::endl;
+                //std::cout << "   not delete" << std::endl;
                 continue;
             }
             assert(mesh.vertEnable[min_cost_pair->edge->v[0]->id]);
@@ -70,17 +67,19 @@ public:
             he::Vert* v0 = min_cost_pair->v[0];
             he::Vert* v1 = min_cost_pair->v[1];
 
+            //std::cout << "start delete edge" << std::endl;
+            //如果翻转，则不允许
+            if (!min_cost_pair->checkMeshInversion()) continue;
+            if (!mesh.deleteEdge(min_cost_pair->edge)) continue;           
+            //mesh.deleteEdge(min_cost_pair->edge);
+            //std::cout << "   delete edge done" << std::endl;
             min_cost_pair->v[0]->pos = min_cost_pair->bestPos;
             min_cost_pair->v[0]->error += min_cost_pair->v[1]->error;
-            std::cout << "start delete edge" << std::endl;
-            mesh.deleteEdge(min_cost_pair->edge);            
-            std::cout << "   delete edge done" << std::endl;
-            mesh.checkTotal();
-            std::cout << "round second check done" << std::endl;
+            //mesh.checkTotal();
+            //std::cout << "round second check done" << std::endl;
  
             std::set<he::Pair*,cmp>& v0_pairs = vert2pair[v0];
             std::set<he::Pair*,cmp>& v1_pairs = vert2pair[v1];
-
 
             //处理v0相关联的pair
             //重新计算，在堆中进行位置更新
@@ -90,7 +89,7 @@ public:
                     he::Pair* pair = *itr;
                     if (mesh.edgeEnable[pair->edge->id] == false) continue;
                     
-                    pair->updateVert();
+                    //pair->updateVert();
                     double prev_cost = pair->cost;
                     pair->recalculate();
                     //std::cout << "prev_cost, cost: " << prev_cost << ", " << pair->cost << std::endl;
@@ -115,12 +114,14 @@ public:
 
                     if (pair->cost < prev_cost) heap.up(pair->id);
                     else heap.down(pair->id);
+
+                    //把这个pair放到v0关联中去
+                    v0_pairs.insert(pair);
                 }
             }
 
-            
-            mesh.checkTotal();
-            std::cout << "round third check done" << std::endl;
+            //mesh.checkTotal();
+            //std::cout << "round third check done" << std::endl;
         }
         printf("\niterator done..\n");
 

@@ -44,6 +44,18 @@ struct Edge {
     }
 };
 
+inline Edge* is_edge(Vert* v0, Vert* v1) {
+    //找到一条v0指向v1的边
+    Edge* edge = v0->edge;
+    if (!edge) return nullptr;
+    do {
+        if (edge->v[1] == v1) return edge;
+        edge = edge->pair->next;
+    } while (edge != v0->edge);
+    return nullptr;
+}
+
+
 typedef std::pair<Vert*, Vert*> stdPair;
 
 struct Pair {
@@ -101,6 +113,8 @@ struct Pair {
         calculateBestPoint();
     }
     void calculateBestPoint() {
+        assert(edge != nullptr);
+        updateVert();
         //确保之前已经计算好了顶点的error
         M4 Q_ = v[0]->error + v[1]->error;
         
@@ -135,18 +149,48 @@ struct Pair {
         
     }
 
-};
+    bool checkMeshInversion() {
+        //检查这个pair是否会导致附近的face法向量翻转
+        //只考虑边收缩
+        assert(edge != nullptr);
+        updateVert();
+        
+        //遍历v0 v1的邻接面除待删的边
+        Edge* v0_v1_edge = is_edge(v[0],v[1]);
+        assert(v0_v1_edge != nullptr);
+        for (int i = 0;i < 2; ++i) {
+            Edge* e = v[i]->edge;
+            do {
+                Face* face = e->face;
+                
+                if (face != v0_v1_edge->face && face != v0_v1_edge->pair->face) {
+                    V3 face_v[3];
+                    //计算face3个点中非v[i]的两个点
+                    {
+                        int k = 0;
+                        Edge* face_e = face->edge;
+                        do {
+                            if (face_e->v[0] != v[i]) {
+                                face_v[k++] = face_e->v[0]->pos;
+                            } else {
+                                face_v[k++] = bestPos;
+                            }
+                            face_e = face_e->next;
+                        } while (face_e != face->edge);
+                    }
 
-inline Edge* is_edge(Vert* v0, Vert* v1) {
-    //找到一条v0指向v1的边
-    Edge* edge = v0->edge;
-    if (!edge) return nullptr;
-    do {
-        if (edge->v[1] == v1) return edge;
-        edge = edge->pair->next;
-    } while (edge != v0->edge);
-    return nullptr;
-}
+                    //计算新法向量
+                    V3 new_normal = ((face_v[0] - face_v[1]) & (face_v[1] - face_v[2])).norm();
+                    //如果翻转　则直接不允许这个pair收缩
+                    if (new_normal * V3(face->p.x,face->p.y,face->p.z) <= 0) return false;
+                }
+                e = e->pair->next;
+            } while (e != v[i]->edge);
+        }
+        return true;
+    }
+
+};
 
 inline void calculateMat4Vert(Vert* v) {
     Edge* e = v->edge;
@@ -200,25 +244,15 @@ struct Mesh {
         }
     }
 
-    void deleteEdge(Edge* edge) {
+    bool deleteEdge(Edge* edge) {
         assert(edgeEnable[edge->id]);
         //删除一条存在的边 v0->v1
         //把edge->v[1]删除　留下edge->v[0]
         //因此实际上就是删掉v[1]并重新链接
         //将会删除两个三角面 6条半边(包括当前边) 1个顶点
-
-        Vert* v1 = edge->v[1];
-        Vert* v0 = edge->v[0];
-        //删除节点v[1]
-        vertEnable[v1->id] = false;
-        vertCount--;
-        //删除边
-        edgeEnable[edge->id] = false;
-        edgeEnable[edge->pair->id] = false;
-        //std::cout << "delete edge id: " << edge->id << std::endl;
-        //std::cout << "delete edge id: " << edge->pair->id << std::endl;
-        edgeCount -= 2;
         /*
+
+        正常情况
             v_up
           /      \
         v0 --e--> v1
@@ -226,12 +260,16 @@ struct Mesh {
           \      /
             v_down 
         */
+
+        Vert* v1 = edge->v[1];
+        Vert* v0 = edge->v[0];
+ 
         //所有非v0，　且与v0无边的v1的邻居
-        //除此之外还有3个点(v0和两个与v0有边的顶点)
+        //除此之外如果正常情况应该还有3个点(v0和两个与v0有边的顶点)
         std::vector<Vert*> neighbor_vert;
         std::vector<Edge*> neighbor_edge;
 
-        int debug_count = 0;
+        int judge_count = 0; //对非v0,且与v0有边的v1的邻居进行计数
         {
             Edge* e = edge->pair;
             assert(e->v[0] == v1);
@@ -242,15 +280,33 @@ struct Mesh {
                 if (e->v[1] != v0 && !is_edge(e->v[1],v0)) {
                     neighbor_vert.push_back(e->v[1]);
                     neighbor_edge.push_back(e);
-                    std::cout << "neighbor v,e: " << e->v[1]->id << ", " << e->id << std::endl;
+                    //std::cout << "neighbor v,e: " << e->v[1]->id << ", " << e->id << std::endl;
                 }
                 //delete!!
-                if (e->v[1] != v0 && is_edge(e->v[1],v0)) debug_count++;
+                if (e->v[1] != v0 && is_edge(e->v[1],v0)) judge_count++;
 
                 e = e->pair->next;
             } while (e != edge->pair);
         }
-        std::cout << "!!!! not v0, connect v0 num: " << debug_count << std::endl;
+
+        //std::cout << "vert neighbor: " << neighbor_vert.size() << std::endl;
+        //std::cout << "edge neighbor: " << neighbor_edge.size() << std::endl;
+
+        //如果非v0, 且与v0有边的v1的邻居个数不等于2(>2)则，可能会将立体变成平面，直接跳过，不删除
+        if (judge_count != 2) return false;
+
+
+        //删除节点v[1]
+        vertEnable[v1->id] = false;
+        vertCount--;
+        //删除边
+        edgeEnable[edge->id] = false;
+        edgeEnable[edge->pair->id] = false;
+        //std::cout << "delete edge id: " << edge->id << std::endl;
+        //std::cout << "delete edge id: " << edge->pair->id << std::endl;
+        edgeCount -= 2;
+ 
+
 
         //std::cout << "vert neighbor: " << neighbor_vert.size() << std::endl;
         //std::cout << "edge neighbor: " << neighbor_edge.size() << std::endl;
@@ -276,11 +332,8 @@ struct Mesh {
         assert(v_down->edge->v[0] == v_down && v_down->edge->v[1] == v0);        
         v0->edge = v_down->edge->pair;
         assert(v0->edge->v[0] == v0);
-        if (v0->id == 3434) {
-            std::cout << "v0: " << v0 << ",  " << v0->id << std::endl;
-            std::cout << "     v0->edge: " << v0->edge << ", " << v0->edge->id << ",  e->v[0]: " << v0->edge->v[0]->id << std::endl;
-        }
 
+        /*
         if (neighbor_vert.size() == 1) {
             //assert(is_edge(v_up, neighbor_vert[0]));
             std::cout << " v_up, v_down, v0, v1: " << v_up->id << ", " << v_down->id << ", " << v0->id << ", " << v1->id << std::endl;
@@ -295,6 +348,7 @@ struct Mesh {
                 e = e->pair->next;
             } while (e != neighbor_edge[0]);
         }
+        */
 
         //删除v1->v_down和v_down->v1这两条边
         {
@@ -370,6 +424,8 @@ struct Mesh {
         {
             for (int i = 0;i < neighbor_vert.size(); ++i) {
                 assert(neighbor_edge[i]->v[1] == neighbor_vert[i]);
+
+                /*
                 if (neighbor_edge[i]->v[0] != v1) {
                     std::cout << "neighbor e v[0]: " << neighbor_edge[i]->v[0] << ", " << neighbor_edge[i]->v[0]->id << std::endl;
                     std::cout << "v1: " << v1 << ",  " << v1->id << std::endl;
@@ -381,6 +437,7 @@ struct Mesh {
                         std::cout << neighbor_vert[k]->id << std::endl;
                     }
                 }
+                */
                 assert(neighbor_edge[i]->v[0] == v1);
                 assert(neighbor_edge[i]->pair->v[1] == v1);
                 assert(neighbor_edge[i]->pair->v[0] == neighbor_vert[i]);
@@ -390,6 +447,8 @@ struct Mesh {
                 neighbor_edge[i]->pair->v[1] = v0;
             }
         }
+
+        return true;
     }
 
     void mergeVert(Vert* v0, Vert* v1) {
@@ -427,13 +486,15 @@ struct Mesh {
             assert(e != nullptr);
             checkEdge(e);
 
+            /*
             if (e->v[0] != v) {
                 std::cout << "error e->v[0]: " << e->v[0] << ", " << e->v[0]->id << std::endl;
                 std::cout << "      e->v[1]: " << e->v[1] << ", " << e->v[1]->id << std::endl;
                 std::cout << "      e: " << e << ", " << e->id << std::endl;
                 std::cout << "      v: " << v << ", " << v->id << std::endl;
             }
-            //assert(e->v[0] == v);
+            */
+            assert(e->v[0] == v);
             assert(e->next->next->next->v[0] == v);
             assert(faceEnable[e->face->id]);
             assert(edgeEnable[e->face->edge->id]);

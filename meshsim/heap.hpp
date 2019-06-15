@@ -2,7 +2,7 @@
 #define _HEAP_
 
 #include <cstring>
-#define DEFAULT_CAPACITY 10000
+#define DEFAULT_CAPACITY 100000
 
 //指针堆
 template<class T, typename Compare>

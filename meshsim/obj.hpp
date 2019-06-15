@@ -55,6 +55,7 @@ public:
         threshold = t;
     }
     void setRatio(double r) {
+        printf("set ratio: %lf\n",r);
         ratio = r;
     }
 

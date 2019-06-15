@@ -302,11 +302,12 @@ struct ObjProcessor {
 
             index_offset += fv;
         }
+
+
+
         int3 order = face_vert3_map[0];
-        std::cout << "connecting...." << std::endl;
         //connectEdge(mesh,face_vert3_map,vert2_face2_map,vert2_edge_map,0,int2(order.x,order.y));
         connectEdgeByLoop(mesh,face_vert3_map,vert2_face2_map,vert2_edge_map,0,int2(order.x,order.y));
-        std::cout << "connecting.end..." << std::endl;
 
         //处理pair
         for (int i = 0;i < mesh.edges.size(); ++i) {
