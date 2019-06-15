@@ -12,5 +12,7 @@ make
 #ratio: target face num / total face num
 ```
 
+## Record
 
-
+- [x] he结构 19.06.15
+- [x] pair selection算法优化 19.06.15
