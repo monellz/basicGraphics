@@ -91,7 +91,7 @@ public:
         timer.start();
         //初始化Q值
         timer.start();
-        mesh.calculateError(); //error!!!
+        mesh.calculateError();
         timer.stop();
         timer.printInfo("calculate Q matrix");
 
@@ -105,8 +105,6 @@ public:
 
         
         //循环简化
-        //mesh.deleteEdge(mesh.edges[0]);
-        //mesh.deleteEdge(mesh.edges[2]);
         timer.start();
         heap.iterate(mesh, int(mesh.faces.size() * ratio));
         timer.stop();
