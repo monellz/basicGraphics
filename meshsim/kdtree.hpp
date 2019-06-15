@@ -31,19 +31,19 @@ private:
 
     Node* root;
 
-    Node* _build(he::Vert* verts, int lo, int hi, int depth) {
+    Node* _build(he::Vert** verts, int lo, int hi, int depth) {
         if (lo >= hi) return nullptr;
         int axis = depth % 3;
         int mid = (lo + hi) >> 1;
 
         std::nth_element(verts + lo, verts + mid, verts + hi,
-        [axis](const he::Vert& lc, const he::Vert& rc) -> bool {
-            return lc.pos[axis] < rc.pos[axis];
+        [axis](he::Vert* const lc,he::Vert* const rc) -> bool {
+            return lc->pos[axis] < rc->pos[axis];
         });                                                                                                                                     
 
         Node* node = new Node();
         node->axis = axis;
-        node->v = &verts[mid];
+        node->v = verts[mid];
         node->lc = _build(verts,lo,mid,depth + 1);
         node->rc = _build(verts,mid + 1, hi, depth + 1);
         return node;
@@ -85,8 +85,11 @@ public:
     }
 
 
-    void build(he::Vert* verts, int size) {
-        root = _build(verts,0,size,0);
+    void build(he::Vert** verts, int size) {
+        he::Vert** vert_copy = new he::Vert*[size];
+        memcpy(vert_copy,verts,sizeof(he::Vert*) * size);
+        root = _build(vert_copy,0,size,0);
+        delete [] vert_copy;
     }
 
     void search(ValidVertPair& vp) {

@@ -45,34 +45,40 @@ public:
             vert2pair[pairs[i].v[1]].insert(&pairs[i]);
         }
 
+
         int round = 0;
-        //target_face_num = 18746;
         while (!heap.empty() && mesh.faceCount > target_face_num) {
-            printf("\rround: %d  face: %d/%lu",round++, mesh.faceCount,mesh.faces.size());
+            printf("\rround: %d  face: %d/%lu                      ",round++, mesh.faceCount,mesh.faces.size());
             //printf("round: %d  face: %d/%lu\n",round++, mesh.faceCount,mesh.faces.size());
 
             //mesh.checkTotal();
             //std::cout << "round first check done" << std::endl;
             he::Pair* min_cost_pair = heap.pop();
-
-            assert(min_cost_pair->edge != nullptr);
-            assert(min_cost_pair->edge->id >= 0 && min_cost_pair->edge->id < mesh.edgeEnable.size());
-            if (mesh.edgeEnable[min_cost_pair->edge->id] == false) {
-                //std::cout << "   not delete" << std::endl;
-                continue;
-            }
-            assert(mesh.vertEnable[min_cost_pair->edge->v[0]->id]);
-            assert(mesh.vertEnable[min_cost_pair->edge->v[1]->id]);
-
             he::Vert* v0 = min_cost_pair->v[0];
             he::Vert* v1 = min_cost_pair->v[1];
 
-            //std::cout << "start delete edge" << std::endl;
-            //如果翻转，则不允许
-            if (!min_cost_pair->checkMeshInversion()) continue;
-            if (!mesh.deleteEdge(min_cost_pair->edge)) continue;           
-            //mesh.deleteEdge(min_cost_pair->edge);
-            //std::cout << "   delete edge done" << std::endl;
+            if (min_cost_pair->edge != nullptr) {
+                //边收缩
+                //assert(min_cost_pair->edge != nullptr);
+                assert(min_cost_pair->edge->id >= 0 && min_cost_pair->edge->id < mesh.edgeEnable.size());
+                if (mesh.edgeEnable[min_cost_pair->edge->id] == false || !mesh.vertEnable[min_cost_pair->edge->v[0]->id] || !mesh.vertEnable[min_cost_pair->edge->v[1]->id]) {
+                    //std::cout << "   not delete" << std::endl;
+                    continue;
+                }
+                assert(mesh.vertEnable[min_cost_pair->edge->v[0]->id]);
+                assert(mesh.vertEnable[min_cost_pair->edge->v[1]->id]);
+
+                //如果翻转，则不允许
+                if (!min_cost_pair->checkMeshInversion()) continue;
+                if (!mesh.deleteEdge(min_cost_pair->edge)) continue;           
+ 
+            } else {
+                //non_edge_part 收缩
+                //边收缩
+                if (!mesh.mergeVert(v0,v1)) continue;
+                //std::cout << "non-edge contraction" << std::endl;
+            }
+
             min_cost_pair->v[0]->pos = min_cost_pair->bestPos;
             min_cost_pair->v[0]->error += min_cost_pair->v[1]->error;
             //mesh.checkTotal();
@@ -87,7 +93,8 @@ public:
                 //std::cout << "v0_pair   size: " << v0_pairs.size() << std::endl;
                 for (auto itr = v0_pairs.begin(); itr != v0_pairs.end(); ++itr) {
                     he::Pair* pair = *itr;
-                    if (mesh.edgeEnable[pair->edge->id] == false) continue;
+                    if (pair == min_cost_pair) continue;
+                    if (pair->edge != nullptr && mesh.edgeEnable[pair->edge->id] == false) continue;
                     
                     //pair->updateVert();
                     double prev_cost = pair->cost;
@@ -105,9 +112,10 @@ public:
                 //std::cout << "v1_pair   size: " << v1_pairs.size() << std::endl;
                 for (auto itr = v1_pairs.begin(); itr != v1_pairs.end(); ++itr) {
                     he::Pair* pair = *itr;
-                    if (mesh.edgeEnable[pair->edge->id] == false) continue;
+                    if (pair == min_cost_pair) continue;
+                    if (pair->edge != nullptr && mesh.edgeEnable[pair->edge->id] == false) continue;
 
-                    pair->updateVert();
+                    //pair->updateVert();
                     double prev_cost = pair->cost;
                     pair->recalculate();
                     //std::cout << "prev_cost, cost: " << prev_cost << ", " << pair->cost << std::endl;
@@ -115,6 +123,11 @@ public:
                     if (pair->cost < prev_cost) heap.up(pair->id);
                     else heap.down(pair->id);
 
+                    if (pair->edge == nullptr) {
+                        he::Vert*& v = (pair->v[0] == v1)? pair->v[0]: pair->v[1];
+                        assert(v == v1);
+                        v = v0;
+                    }
                     //把这个pair放到v0关联中去
                     v0_pairs.insert(pair);
                 }

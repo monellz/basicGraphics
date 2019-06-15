@@ -34,5 +34,5 @@
 
 
 # Surface Simplication
-- [ ] he结构
-- [ ] pair selection算法优化
+- [x] he结构 19.06.15
+- [x] pair selection算法优化 19.06.15

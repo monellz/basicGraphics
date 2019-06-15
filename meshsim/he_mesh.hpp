@@ -48,7 +48,13 @@ inline Edge* is_edge(Vert* v0, Vert* v1) {
     //找到一条v0指向v1的边
     Edge* edge = v0->edge;
     if (!edge) return nullptr;
+    int count = 0;
     do {
+        count++;
+        if (count > LOOP_INFINIT) {
+            std::cout << "warning! is_edge infinit loop" << std::endl;
+            return nullptr;
+        }
         if (edge->v[1] == v1) return edge;
         edge = edge->pair->next;
     } while (edge != v0->edge);
@@ -88,6 +94,11 @@ struct Pair {
         id = p.id;
     }
 
+    Pair(const stdPair& pair):edge(nullptr),cost(INF) {
+        v[0] = pair.first;
+        v[1] = pair.second;
+    }
+
     void printInfo() const {
         std::cout << "edge: " << edge << std::endl;
         std::cout << "v[0]xyz: " << v[0]->pos[0] << ", " << v[0]->pos[1] << ", " << v[0]->pos[2] << std::endl;
@@ -113,8 +124,7 @@ struct Pair {
         calculateBestPoint();
     }
     void calculateBestPoint() {
-        assert(edge != nullptr);
-        updateVert();
+        if (edge != nullptr) updateVert();
         //确保之前已经计算好了顶点的error
         M4 Q_ = v[0]->error + v[1]->error;
         
@@ -451,8 +461,33 @@ struct Mesh {
         return true;
     }
 
-    void mergeVert(Vert* v0, Vert* v1) {
+    bool mergeVert(Vert* v0, Vert* v1) {
         //合并两个节点 这两个节点之间不存在边!
+        Edge* edge = is_edge(v0,v1);
+        if (edge != nullptr || !vertEnable[v0->id] || !vertEnable[v1->id]) return false;
+        
+        //把v[1]合并到v[0]
+        //遍历v[1]的边即可
+        Edge* e = v1->edge;
+        std::cout << "check" << std::endl;
+        checkEdge(e);
+        std::cout << "check right" << std::endl;
+        int i = 0;
+        do {
+            std::cout << "i: " << i++ << std::endl;
+            assert(e->v[0] == v1);
+            assert(e->pair->v[1] == v1);
+
+            e->v[0] = v0;
+            e->pair->v[1] = v0;
+
+            e = e->pair->next;
+        } while (e != v1->edge);
+
+        vertEnable[v1->id] = false;
+        vertCount--;
+
+        return true;
     }
 
 

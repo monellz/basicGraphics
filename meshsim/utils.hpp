@@ -15,6 +15,10 @@
 #define EPS 1e-6
 #define INF 1e30
 
+#define LOOP_INFINIT 100000
+
+#define DEFAULT_THRESHOLD 0.00001
+
 template<class T>
 T min(const T& a, const T& b) {
     return a < b? a:b;

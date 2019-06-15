@@ -21,35 +21,40 @@ private:
 
 
     void selectPair() {
-        //naive_select
-        //O(n^2)
         
-        //这里只考虑了边
+        //这里考虑边
+        //O(e)
         for (int i = 0;i < mesh.edges.size(); ++i) {
             if (mesh.edges[i]->v[0]->id < mesh.edges[i]->v[1]->id) {
                 heap.insert(he::Pair(mesh.edges[i]));
             }
         }
 
-        /*
+
         tree.build(mesh.verts.data(),mesh.verts.size());
 
         //O(n)
+        
+        int non_edge_pair_count = 0;
         for (int i = 0;i < mesh.verts.size(); ++i) {
-            ValidVertPair vp(&mesh.verts[i],threshold);
+            ValidVertPair vp(mesh.verts[i],threshold);
             //O(log n)
             tree.search(vp);
+            //std::cout << "i: " << i << "  vp size: " << vp.std_pairs.size() << std::endl;
 
             for (int k = 0;k < vp.std_pairs.size(); ++k) {
-                //do something
-            }
-            
-        }
+                if (!he::is_edge(vp.std_pairs[k].first,vp.std_pairs[k].second) && vp.std_pairs[k].first->id < vp.std_pairs[k].second->id) {
+                    non_edge_pair_count++;
+                    heap.insert(he::Pair(vp.std_pairs[k]));
+                }
 
-        */
+            }
+        }
+        std::cout << "non-edge pair num: " << non_edge_pair_count << std::endl;
+        
     }
 public:
-    Object():threshold(0.5),ratio(0.5){}
+    Object():threshold(DEFAULT_THRESHOLD),ratio(0.5){}
 
     void setThreshold(double t) {
         threshold = t;
