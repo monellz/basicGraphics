@@ -10,6 +10,8 @@ int main(int argc, char** argv) {
     obj.loadFile(std::string(argv[1]));
     double ratio = atof(argv[3]);
     obj.setRatio(ratio);
+
+
     obj.simplify();
 
     obj.dumpFile(std::string(argv[2]));

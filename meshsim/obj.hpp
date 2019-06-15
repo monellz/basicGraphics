@@ -110,7 +110,6 @@ public:
         timer.stop();
         timer.printInfo("heap iterate");
 
-        //输出文件
 
         printf("simplify done...\n");
         timer.stop();
