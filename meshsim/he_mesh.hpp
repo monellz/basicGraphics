@@ -224,6 +224,12 @@ struct Mesh {
     int vertCount = 0;
     int edgeCount = 0;
     int faceCount = 0;
+
+    ~Mesh() {
+        for (int i = 0;i < verts.size(); ++i) delete verts[i];
+        for (int i = 0;i < edges.size(); ++i) delete edges[i];
+        for (int i = 0;i < faces.size(); ++i) delete faces[i];
+    }
     
     void addVert(Vert* v) {
         v->id = verts.size();
