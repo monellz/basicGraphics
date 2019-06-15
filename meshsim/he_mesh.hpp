@@ -61,6 +61,15 @@ inline Edge* is_edge(Vert* v0, Vert* v1) {
     return nullptr;
 }
 
+inline void calculateMat4Vert(Vert* v) {
+    Edge* e = v->edge;
+    do {
+        v->error += M4(e->face->p);
+        e = e->pair->next;
+
+        assert(e != nullptr);
+    } while (e != v->edge);
+}
 
 typedef std::pair<Vert*, Vert*> stdPair;
 
@@ -202,16 +211,6 @@ struct Pair {
 
 };
 
-inline void calculateMat4Vert(Vert* v) {
-    Edge* e = v->edge;
-    do {
-        v->error += M4(e->face->p);
-        e = e->pair->next;
-
-        assert(e != nullptr);
-    } while (e != v->edge);
-}
-
 struct Mesh {
     std::vector<Vert*> verts;
     std::vector<Edge*> edges;
@@ -343,22 +342,6 @@ struct Mesh {
         v0->edge = v_down->edge->pair;
         assert(v0->edge->v[0] == v0);
 
-        /*
-        if (neighbor_vert.size() == 1) {
-            //assert(is_edge(v_up, neighbor_vert[0]));
-            std::cout << " v_up, v_down, v0, v1: " << v_up->id << ", " << v_down->id << ", " << v0->id << ", " << v1->id << std::endl;
-            Edge* e = neighbor_edge[0];
-            assert(e->v[0] == v1);
-            do {
-                if (e != edge && e != edge->pair) assert(edgeEnable[e->id]);
-                assert(e->v[0] == v1);
-                std::cout << "v1 neibor edge: " << e->id << std::endl;
-                std::cout << "  to vert: " << e->v[1]->id << std::endl;
-
-                e = e->pair->next;
-            } while (e != neighbor_edge[0]);
-        }
-        */
 
         //删除v1->v_down和v_down->v1这两条边
         {
@@ -434,20 +417,6 @@ struct Mesh {
         {
             for (int i = 0;i < neighbor_vert.size(); ++i) {
                 assert(neighbor_edge[i]->v[1] == neighbor_vert[i]);
-
-                /*
-                if (neighbor_edge[i]->v[0] != v1) {
-                    std::cout << "neighbor e v[0]: " << neighbor_edge[i]->v[0] << ", " << neighbor_edge[i]->v[0]->id << std::endl;
-                    std::cout << "v1: " << v1 << ",  " << v1->id << std::endl;
-                    std::cout << "neighbor e v[0] enable: " << vertEnable[neighbor_edge[i]->v[0]->id] << std::endl;
-                    std::cout << "v1 enable: " << vertEnable[v1->id] << std::endl;
-
-
-                    for (int k = 0;k < neighbor_vert.size(); ++k) {
-                        std::cout << neighbor_vert[k]->id << std::endl;
-                    }
-                }
-                */
                 assert(neighbor_edge[i]->v[0] == v1);
                 assert(neighbor_edge[i]->pair->v[1] == v1);
                 assert(neighbor_edge[i]->pair->v[0] == neighbor_vert[i]);
@@ -469,12 +438,9 @@ struct Mesh {
         //把v[1]合并到v[0]
         //遍历v[1]的边即可
         Edge* e = v1->edge;
-        std::cout << "check" << std::endl;
         checkEdge(e);
-        std::cout << "check right" << std::endl;
         int i = 0;
         do {
-            std::cout << "i: " << i++ << std::endl;
             assert(e->v[0] == v1);
             assert(e->pair->v[1] == v1);
 
@@ -521,14 +487,6 @@ struct Mesh {
             assert(e != nullptr);
             checkEdge(e);
 
-            /*
-            if (e->v[0] != v) {
-                std::cout << "error e->v[0]: " << e->v[0] << ", " << e->v[0]->id << std::endl;
-                std::cout << "      e->v[1]: " << e->v[1] << ", " << e->v[1]->id << std::endl;
-                std::cout << "      e: " << e << ", " << e->id << std::endl;
-                std::cout << "      v: " << v << ", " << v->id << std::endl;
-            }
-            */
             assert(e->v[0] == v);
             assert(e->next->next->next->v[0] == v);
             assert(faceEnable[e->face->id]);
