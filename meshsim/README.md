@@ -5,6 +5,7 @@
 * 采用hafl edge结构
 * 使用第三方库 tiny\_obj\_loader.h
 * 不支持之前未连接的顶点合并
+* 只支持manifold的obj
 
 ## Usage
 
