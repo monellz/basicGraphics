@@ -291,7 +291,8 @@ struct ObjProcessor {
                     itr->second.y = face->id;
                     assert(itr->second.x != face->id);
                 } else {
-                    std::cout << "??? error" << std::endl;
+                    std::cout << "error! maybe not manifold" << std::endl;
+                    exit(1);
                 }
             }            
 
