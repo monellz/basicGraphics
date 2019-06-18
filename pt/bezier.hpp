@@ -92,7 +92,8 @@ public:
 
     Bezier(int id_, double* x_, double* y_, int num_, V3 e_, V3 c_, Refl_t refl_, double ns_ = 1.5)
         : Object(id_,e_,c_,refl_,ns_),curve(x_,y_,num_) {}
-    
+    Bezier(int id_, double* x_, double* y_, int num_, V3 e_, std::string fn_, Refl_t refl_, double ns_ = 1.5)
+        : Object(id_,e_,fn_,refl_,ns_),curve(x_,y_,num_) {}   
     bool intersect(const Ray& r, Intersection& res) override {
         V3 seed;
 
@@ -113,7 +114,21 @@ public:
             res.n = -res.n;
         }
         
-        //纹理??
+
+        //纹理
+        
+        V3 tmp = curve.pos(seed.x);
+        V3 intersect_p = r.pos(seed.z);
+        res.b = (tmp.y - curve.minY) / (curve.maxY - curve.minY);
+        res.a = atan2(intersect_p.z,intersect_p.x);
+        if (res.a < 0) res.a += 2 * PI;
+        res.a /= 2 * PI;
+        
+        //res.a = seed.y;
+        //res.b = seed.x;
+
+
+
         return true;
     }
 
@@ -236,7 +251,7 @@ public:
         //找t最小值
         double t_final = INF;
         for (int i = 0;i < MAX_RAND_SEED; ++i) {
-            if (is_intersect[i] && t[i] < t_final && t[i] > EPS) {
+            if (is_intersect[i] && t[i] < t_final && t[i] > EPS && u[i] >= 0 && u[i] <= 1 && v[i] >= 0 && v[i] <= 1) {
                 t_final = t[i];
                 seed.x = u[i];
                 seed.y = v[i];
@@ -246,67 +261,6 @@ public:
 
         if (t_final < INF) return true;
         else return false;
-        /*
-        seed = V3(0.5,0.5,100);
-
-        for (int i = 0;i < 15; ++i) {
-            
-            //std::cout << "round " << i << std::endl;
-            //std::cout << "seed: " << std::endl;
-            //seed.print();
-            
-            //f(u,v,t) = S(u,v,t) - L(t)
-            V3 f = this->F(r,seed);
-            //std::cout << "F(u,v,t) : " << std::endl;
-            //f.print();
-            //if (f.len() > 1e30) return false;
-            M3 jacobi = this->F_jacobi(r,seed);
-
-            double det = jacobi.det();
-            //std::cout << "jacobi det: " << det << std::endl;
-            
-            if (fabs(det) < EPS || fabs(det) > 1e15) {
-                //std::cout << "det too small break" << std::endl;
-                break;
-            }
-
-            M3 rev = jacobi.reverse();
-            
-            M3 unit = rev * jacobi;
-            std::cout << "--------------" << std::endl;
-            jacobi.print();
-            rev.print();
-            unit.print();
-            getchar();
-            std::cout << "-------------" << std::endl;
-            
-            //std::cout << "jacobi reverse:" << std::endl;
-            //rev.print();
-           
-            //x_{i + 1} = x_i - \frac {F(x_i)} / {F_derivate(x_i)}
-            seed = seed - rev.dot(f);
-        }
-                
-        //判断迭代结果是否收敛
-        //seed.print();
-        
-        double delta = this->F(r,seed).len();
-        
-        //std::cout << "tolerance: " << delta << std::endl;
-        //std::cout << "------end-------" << std::endl;
-        
-        if (fabs(delta) > EPS) return false;
-        //if (seed.x < 0 || seed.x > 1 || seed.y < 0 || seed.y > 1 || seed.z < 0) return false;
-        if (seed.x < 0 || seed.x > 1 || seed.z < 0) return false;
-        
-        std::cout << "cross!!! delta: " << delta << std::endl;
-        std::cout << "seed: " << std::endl;
-        seed.print();
-        std::cout << "f(u,v,t) = " << std::endl;
-        V3 f = this->F(r,seed);
-        f.print();
-        */
-        return true;
     }
 
 
