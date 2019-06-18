@@ -43,8 +43,8 @@ public:
         V3 x = r.pos(t);
         V3 dx = V3(1,0,0);
         V3 dy = V3(0,1,0);
-        res.a = x.dot(dx) / 150 + 0.5;
-        res.b = -x.dot(dy) / 150;
+        res.a = x.dot(dx) / 330 + 1.4;
+        res.b = -x.dot(dy) / 330;
 
         return true;
     }

@@ -38,7 +38,7 @@ const double _maxpos = 1000;
 #define PPM_MAX_PHOTONS 1000000
 #define PPM_EMIT_PHOTONS 1000000
 #define PPM_INIT_R2 9 //初始化碰撞点半径平方
-#define PPM_ROUND 1 //PPM迭代次数
+#define PPM_ROUND 160 //PPM迭代次数
 
 
 //景深效果  限pt
@@ -55,6 +55,6 @@ const double _maxpos = 1000;
 //shadow map 体积光用
 //#define GOD_RAY
 #define SHADOW_SPLIT_NUM 1000
-#define GOD_RAY_SAMP 1
+#define GOD_RAY_SAMP 10 
 
 #endif

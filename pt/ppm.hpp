@@ -169,6 +169,25 @@ public:
         delete pm;
     }
 
+    void generateIMGInRound(int round, std::string fn) {
+        FILE *f = fopen((fn + "+" + std::to_string(round)).c_str(),"w");
+        fprintf(f, "P6\n%d %d\n%d\n", w, h, 255);
+        V3* image = new V3[w * h];
+
+        for (int i = 0; i < hm->getStoreNum(); ++i) {
+            HitPoint* hp = hm->getHitPoint(i);
+            image[hp->index] += hp->flux / (PI * hp->r2 * PPM_ROUND);
+        }
+        for (int i = h - 1;i >= 0; --i) {
+            for (int j = w - 1; j >= 0; --j) {
+                image[i * w + j] = image[i * w + j].clamp();
+                fprintf(f, "%c%c%c", toColor(image[i * w + j][0]), toColor(image[i * w + j][1]), toColor(image[i * w + j][2]));
+            }
+        } 
+
+        delete [] image;
+    }
+
     void rendering() override {
         cout << "into rendering" << endl;
         Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
@@ -182,8 +201,9 @@ public:
 
 
         //#pragma omp parallel for schedule(dynamic, 1) private(r)
+        cout << "samp: " << samp << endl;
         for(int y=0;y<h;++y){
-            fprintf(stderr,"\rUsing %d spp  %5.2f%%  hitpoint %d",samp*4,100.*y/h,hm->getStoreNum());
+            fprintf(stderr,"\rUsing %d samp  %5.2f%%  hitpoint %d",samp*4,100.*y/h,hm->getStoreNum());
             for(int x=0;x<w;++x){
                 //cout << "x: " 0<< x << endl;
                 
@@ -197,10 +217,9 @@ public:
                 for(int sy=0;sy<2;++sy)
                     for(int sx=0;sx<2;++sx)
                     {
-                        unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
-                        //basic
+                        //unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
+                        unsigned short X[3]={y,y*x,sx*sy};
                         r[0]=r[1]=r[2]=0;
-                        samp = 5;
                         for(int s=0;s<samp;++s){
                             double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
                             double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
@@ -221,15 +240,16 @@ public:
             
             //photontrace(); //更新hitpoints
 
-            #pragma omp parallel for schedule(dynamic, 1) private(r)
+            //#pragma omp parallel for schedule(dynamic, 1) private(r)
             for (int i = 0;i < PPM_EMIT_PHOTONS; ++i) {
                 fprintf(stderr,"\rround %d  emited %5.2f%%",round,100.* i / PPM_EMIT_PHOTONS);
-                unsigned short X[3] = {i + 1, i * i + 10, exp(i) + 100};
+                unsigned short X[3] = {i + 1, i + 10, i + 100};
                 Photon pt = scene->emitPhoton(PPM_EMIT_PHOTONS);
                 //pt.power = pt.power * 2500 * PI * 4;
                 photontrace(pt,V3(1,1,1),0,X);
             } 
             
+            if (round % 10 == 0) generateIMGInRound(round,"ppm");
         }
         //??
         //最终估计

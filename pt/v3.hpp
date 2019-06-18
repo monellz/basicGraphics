@@ -17,6 +17,12 @@ struct int4 {
     int operator[] (int i) const {return it[i];}
 };
 
+struct f2 {
+    double f[2];
+    double &operator[] (int i) {return f[i];}
+    double operator[] (int i) const {return f[i];}
+};
+
 //列向量
 struct V3{
     //double x, y, z;

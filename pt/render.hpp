@@ -234,6 +234,7 @@ public:
                             //r+=radiance(Ray(cam.o+d*120,d.norm()),0,X);
                             //r += radiance(Ray(cam.o + d * 120, d.norm()), 0, X);
                             r += radiance(Ray(cam.o + d * 110, d.norm()), 0, X);
+
                         }
                         #else
                         //景深随机取点
@@ -280,7 +281,8 @@ public:
                 //直接计算
                 const int stepNum = 100;
                 //const double e = 1000000; //basic
-                const double e = 50000;
+                const double e = 400000; //basic
+                //const double e = 50000; //单独计算
                 double stepSize = result.t / stepNum;
                 double t = 0;
                 double l = 0;
@@ -289,12 +291,16 @@ public:
                    
 
                     for (int s = 0; s < GOD_RAY_SAMP; ++s) {
+                        //物理模拟
+                        Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
+                        
+                        /*
                         //直接求交检查是否可见
-                        //Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
                         V3 d(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1);
                         V3 origin = p + d / w;
                         //Ray r(p,scene->lighter->o - p);
                         Ray r(origin,scene->lighter->o - origin);
+                        */
                         Intersection tmp;
 
                         if (scene->findNearest_naive(r,tmp)) {
@@ -310,6 +316,25 @@ public:
                             }
                         }
                         
+                        //直接求交检查是否可见
+                        V3 d(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1);
+                        V3 origin = p + d / w;
+                        r = Ray(p,scene->lighter->o - p);
+                        if (scene->findNearest_naive(r,tmp)) {
+                            if (tmp.id == scene->lighter->id) {
+                                double vlight = (50000) / (p - scene->lighter->o).len2();
+                                //HG公式计算系数
+                                double g = 0.5;
+                                double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
+                                double tmp = (1 + g * g - 2 * g * costheta);
+                                double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
+                                //cout << "hg: " << hg << endl;
+                                l += vlight / GOD_RAY_SAMP * hg;
+                            }
+                        }
+ 
+
+
                         //使用radiance计算
                         /*
                         Ray r(p,scene->lighter->o - p);

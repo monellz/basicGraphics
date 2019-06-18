@@ -8,13 +8,26 @@ class Triangle: public Object {
 public:
     V3 pts[3];
     V3 n; //所指方向为三角片外向 
+    double tuv[3][2];
     Triangle(int id_, V3 p1, V3 p2, V3 p3, V3 n_, V3 e_, V3 c_, Refl_t refl_, double ns_ = 1.5):
         Object(id_,e_,c_,refl_,ns_),n(n_.norm()) {
             pts[0] = p1;
             pts[1] = p2;
             pts[2] = p3;
         }
+    Triangle(int id_, V3 p1, V3 p2, V3 p3, V3 n_, V3 e_, std::string fn_,f2 uv1,f2 uv2, f2 uv3, Refl_t refl_, double ns_ = 1.5):
+        Object(id_,e_,fn_,refl_,ns_),n(n_.norm()) {
+            pts[0] = p1;
+            pts[1] = p2;
+            pts[2] = p3;
 
+            tuv[0][0] = uv1[0];
+            tuv[0][1] = uv1[1];
+            tuv[1][0] = uv1[0];
+            tuv[1][1] = uv1[1];
+            tuv[2][0] = uv1[0];
+            tuv[2][1] = uv1[1];
+        }
     bool intersect(const Ray& r, Intersection& res) override {
         if (n.dot(r.d) == 0) return 0;
         //cramer法则求解
@@ -42,6 +55,8 @@ public:
             res.n = res.into? n.norm():-n.norm();
 
             //纹理?
+            res.a = tuv[0][0];
+            res.b = tuv[0][1];
 
             return true;
         } else return false;
