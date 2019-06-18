@@ -176,7 +176,7 @@ public:
 
         for (int i = 0; i < hm->getStoreNum(); ++i) {
             HitPoint* hp = hm->getHitPoint(i);
-            image[hp->index] += hp->flux / (PI * hp->r2 * PPM_ROUND);
+            image[hp->index] += hp->flux / (PI * hp->r2 * round * PI);
         }
         for (int i = h - 1;i >= 0; --i) {
             for (int j = w - 1; j >= 0; --j) {
