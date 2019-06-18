@@ -42,7 +42,7 @@ public:
         objs.push_back(new Sphere(objs.size(),13,V3(55,13,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
         //objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
         objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
-        objs.push_back(new Sphere(objs.size(),10,V3(60,10,90),       V3(), V3(0.8,0.8,0.999), REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),10,V3(60,10,90),       V3(), V3(0.8,0.8,0.8), REFR));//Glas 
         lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         //lighter =new Sphere(objs.size(),30, V3(25,131.6-0.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite  for glass
         objs.push_back(lighter);
