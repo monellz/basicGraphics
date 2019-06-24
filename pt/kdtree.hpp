@@ -44,73 +44,7 @@ struct kdNode {
         double tmax_ = min(tmax[0],tmax[1],tmax[2]);
         if (tmin_ < tmax_) return true;
         else return false;
-        
-        /*
-        for (int i = 0;i < 3; ++i) {
-            double t1 = -1, t2 = -1;
-            if (r.d[i] != 0) {
-                t1 = (box.first[i] - r.o[i]) / r.d[i];
-                t2 = (box.second[i] - r.o[i]) / r.d[i];
-            }
-            if (t1 >= EPS) {
-                V3 pts = r.pos(t1);
-                bool ok = true;
-                for (int j = 0;j < 3; ++j) {
-                    if (j == i) continue;
-                    if (pts[j] < box.first[j] + EPS || pts[j] > box.second[j] - EPS) {
-                        ok = false;
-                        break;
-                    }
-                }
-                if (ok) return true;
-            }
-            if (t2 >= EPS) {
-                V3 pts = r.pos(t2);
-                bool ok = true;
-                for (int j = 0;j < 3; ++j) {
-                    if (j == i) continue;
-                    if (pts[j] < box.first[j] + EPS || pts[j] > box.second[j] - EPS) {
-                        ok = false;
-                        break;
-                    }
-                }
-                if (ok) return true;
-            }
-        }
-        return false;
-        */
-        
-        
-        /*
-        if (r.d.x != 0) {
-            if (r.d.x > 0) t = (box.first.x - r.o.x) / r.d.x;
-            else t = (box.second.x - r.o.x) / r.d.x;
-            if (t > 0) {
-                pts = r.pos(t);
-                if (box.first.y < pts.y && pts.y < box.second.y && box.first.z < pts.z && pts.z < box.second.z)
-                    return t;
-            }
-        }
-        if (r.d.y != 0) {
-            if (r.d.y > 0) t = (box.first.y - r.o.y) / r.d.y;
-            else t = (box.second.y - r.o.y) / r.d.y;
-            if (t > 0) {
-                pts = r.pos(t);
-                if (box.first.z < pts.z && pts.z < box.second.z && box.first.x < pts.x && pts.x < box.second.x)
-                    return t;
-            }
-        }
-        if (r.d.z != 0) {
-            if (r.d.z > 0) t = (box.first.z - r.o.z) / r.d.z;
-            else t = (box.second.z - r.o.z) / r.d.z;
-            if (t > 0) {
-                pts = r.pos(t);
-                if (box.first.x < pts.x && pts.x < box.second.x && box.first.y < pts.y && pts.y < box.second.y)
-                    return t;
-            }
-        }
-        return -1;
-        */
+
     }
 
 };

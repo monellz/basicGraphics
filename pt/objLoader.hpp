@@ -53,7 +53,9 @@ struct ObjLoader {
                 }
                 index_offset += fv;
 
-                objs.push_back(new Triangle(objs.size(),pts[0],pts[1],pts[2],(pts[0] - pts[1]) & (pts[1] - pts[2]), V3(), V3(1,1,1) * 0.3, refl));
+                //objs.push_back(new Triangle(objs.size(),pts[0],pts[1],pts[2],(pts[0] - pts[1]) & (pts[1] - pts[2]), V3(), V3(1,1,1) * 0.3, refl)); //ppm
+                //objs.push_back(new Triangle(objs.size(),pts[0],pts[1],pts[2],(pts[0] - pts[1]) & (pts[1] - pts[2]), V3(), V3(1,1,1) * 0.5, refl)); //pt god ray
+                objs.push_back(new Triangle(objs.size(),pts[0],pts[1],pts[2],(pts[0] - pts[1]) & (pts[1] - pts[2]), V3(), V3(1,1,1) * 0.999, refl));
                 //objs.push_back(new Triangle(objs.size(),pts[0],pts[1],pts[2],(pts[0] - pts[1]) & (pts[1] - pts[2]), V3(), "veliero-tri.jpeg",tuv[0],tuv[1],tuv[2], refl));
             }
         }

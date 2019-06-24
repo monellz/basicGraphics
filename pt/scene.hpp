@@ -25,7 +25,9 @@ public:
         
 
 
+        
         //ppm场景                
+        /*
         //objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         //objs.push_back(new Plane(objs.size(),V3(0,0,1),-50,V3(),V3(.25,.25,.75),DIFF));  //Back
 
@@ -42,7 +44,7 @@ public:
         objs.push_back(new Sphere(objs.size(),13,V3(55,13,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
         //objs.push_back(new Sphere(objs.size(),16.5,V3(20,40,60),       V3(),"marble.bmp", DIFF));//Glas 
         objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
-        objs.push_back(new Sphere(objs.size(),10,V3(60,10,90),       V3(), V3(0.8,0.8,0.8), REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),10,V3(60,10,90),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
         lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         //lighter =new Sphere(objs.size(),30, V3(25,131.6-0.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite  for glass
         objs.push_back(lighter);
@@ -52,10 +54,20 @@ public:
         double x[] = {-15,-7,-40,-25,25,40,7,15};
         double y[] = {-15,-50,-55,-60,-60,-55,-50,-15};
         for (int i = 0;i < 8; ++i) y[i] += 55;
-        //objs.push_back(new Bezier(objs.size(),x,y,8,V3(0,0,0),V3(0.5,0.5,0.5),DIFF));
         objs.push_back(new Bezier(objs.size(),x,y,8,V3(0,0,0),"vase.png",DIFF));
         loader.load("veliero.obj",objs,V3(20,10,20),REFR);
-         
+        */
+
+        //pt 景深
+        objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
+        objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
+        objs.push_back(new Sphere(objs.size(),13,V3(70,13,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
+        lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
+        objs.push_back(lighter);
+        
+
+        loader.load("veliero-rotate.obj",objs,V3(20,10,50),REFR);
+        //loader.load("bunny.obj",objs,V3(20,10,20),REFR);
         
         
 
@@ -75,6 +87,7 @@ public:
         objs.push_back(lighter);
         */
         
+        //pt 体积光
         /*
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-10,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF)); //botm
@@ -90,7 +103,7 @@ public:
         //objs.push_back(new Sphere(objs.size(),1e5, V3(50,-1e5+83.6,81.6),V3(),V3(.75,.75,.75),DIFF));//Top
         objs.push_back(new Plane(objs.size(),V3(0,1,0),81.6,V3(),V3(.75,.75,.75),DIFF));  //Top
 
-        //objs.push_back(new Sphere(objs.size(),16.5,V3(27,16.5,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr
+        objs.push_back(new Sphere(objs.size(),15,V3(25,15,45),       V3(),V3(1,1,1)*.999, REFR));//Mirr
         //objs.push_back(new Sphere(objs.size(),16.5,V3(73,16.5,78),       V3(),V3(1,1,1)*.999, REFR));//Glas
         //lighter = new Sphere(objs.size(), 600, V3(50,681.6-.27,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
         lighter = new Sphere(objs.size(), 400, V3(50,481.6-.5,81.6),V3(1,1,1) * 12,  V3(), DIFF);//Lite
@@ -98,15 +111,8 @@ public:
         //readObj("Alucy_adjust.obj",V3(25,0,60),DIFF);
         loader.load("Alucy_adjust.obj",objs,V3(25,0,60),DIFF);
         */
+        
  
-
-        //--------------obj-----------------
-        //objs.push_back(new Triangle(objs.size(),V3(20,60,80),V3(20,40,80),V3(40,40,80),V3(0,0,1),V3(),V3(.25,.25,.95),DIFF));
-        //readObj("bezier_mesh.obj");
-        //readObj("temple.obj");
-        //readObj("room.obj");
-        //readObj("Alucy_adjust.obj");
-        //readObj("glass.obj");
 
         std::cout << "obj total: " << objs.size() << std::endl;
         std::cout << "build tree" << std::endl;

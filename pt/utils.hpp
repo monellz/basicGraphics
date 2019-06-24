@@ -42,7 +42,7 @@ const double _maxpos = 1000;
 
 
 //景深效果  限pt
-//#define DEPTH
+#define DEPTH
 #define FOCAL_RAD 5  //景深随机圆盘取点半径
 #define FOCAL_DIS 78
 
@@ -52,9 +52,8 @@ const double _maxpos = 1000;
 #define MAX_RAND_SEED 20
 
 
-//shadow map 体积光用
+//体积光
 //#define GOD_RAY
-#define SHADOW_SPLIT_NUM 1000
 #define GOD_RAY_SAMP 10 
 
 #endif

@@ -37,139 +37,47 @@ public:
 
 class PT: public Render {
 private:
-    double shadowmap[SHADOW_SPLIT_NUM][SHADOW_SPLIT_NUM];
-
-    double checkDepth(double theta, double fai) {
-        //返回这一点的深度
-        //二分搜索
-
-        double dtheta = PI / SHADOW_SPLIT_NUM;
-        double dfai = 2 * PI / SHADOW_SPLIT_NUM;
-
-        int lo = 0, mid;
-        int half, len = SHADOW_SPLIT_NUM;
-        while (len > 0) {
-            half = len >> 1;
-            mid = lo + half;
-            if (mid * dtheta < theta) {
-                lo = mid + 1;
-                len = len - half - 1; //在右边序列中查找
-            } else len = half; //左边序列
-        }
-
-        int i = lo;
-
-        lo = 0;
-        len = SHADOW_SPLIT_NUM;
-        while (len > 0) {
-            half = len >> 1;
-            mid = lo + half;
-            if (mid * dfai < fai) {
-                lo = mid + 1;
-                len = len - half - 1;
-            } else len = half;
-        }
-
-        int j = lo;
-
-        return shadowmap[i][j]; //basic
-        //return shadowmap[i + 1][j + 1];
-    }
-
-    void createShadowMap() {
-        /*
-        只考虑球光源
-        方向(theta, fai) 到深度的map
-
-        坐标转换
-        (x,y,z) = (sin theta * cos fai, sin theta * sin fai, cos theta)
-        (theta, fai) = (acos(z), atan(y / x))
-
-        theta \in [0, pi] 
-        fai \in [0, 2pi]
-
-        将theta,fai均分
-        */
-
-        cout << "create shadow map" << endl;
-        double dtheta = PI / SHADOW_SPLIT_NUM;
-        double dfai = 2 * PI / SHADOW_SPLIT_NUM;
-
-        //预处理sin cos
-        double cosk[SHADOW_SPLIT_NUM];
-        double sink[SHADOW_SPLIT_NUM];
-        double cos2k[SHADOW_SPLIT_NUM];
-        double sin2k[SHADOW_SPLIT_NUM];
-        for (int i = 0;i < SHADOW_SPLIT_NUM; ++i) {
-            cosk[i] = cos(i * dtheta);
-            sink[i] = sin(i * dtheta);
-            cos2k[i] = cos(i * dfai);
-            sin2k[i] = sin(i * dfai);
-        }
-        for (int i = 0;i < SHADOW_SPLIT_NUM; ++i) {
-            for (int j = 0;j < SHADOW_SPLIT_NUM; ++j) {
-                //测试深度
-                V3 d(sink[i] * cos2k[j], sink[i] * sin2k[j], cosk[i]);
-                //V3 d(sin(i * dtheta) * cos(j * dfai), sin(i * dtheta) * sin(j * dfai), cos(i * dtheta));
-                //V3 o = scene->lighter->o + d * (scene->lighter->rad + EPS);
-                V3 o = scene->lighter->o + d * (scene->lighter->rad);
-                Ray r(o,d);
-
-                Intersection res;
-                if (scene->findNearest_naive(r,res)) {
-                    //计算光源到碰撞点的深度
-                    shadowmap[i][j] = (r.pos(res.t) - scene->lighter->o).len();
-                } else {
-                    //没有交点 深度无穷
-                    shadowmap[i][j] = INF;
-                }
-            }
-        }
-               
-    }
-
-
     V3 radiance(const Ray&r, int dep,unsigned short *X, int maxdepth = 1000){
         Intersection res;
-        if(!scene->findNearest_naive(r,res))return V3();
+        if(!scene->findNearest_naive(r,res)) return V3();
         Object* obj = scene->getObj(res.id);
 
-        //体积光 ray march
+        V3 x = r.pos(res.t),n = res.n,color=obj->material.color(res.a,res.b);
 
-
-
-        V3 x=r.pos(res.t),nl = res.n,f=obj->material.color(res.a,res.b);
-        //n 球心到交点
-        //nl 入射光对应法向量
-
-        double p=f.max();
+        double p=color.max();
         if (dep > maxdepth) return obj->material.e;
         if(++dep > 5)
-            if(erand48(X)<p) f/=p;
-            //if(erand48(X)<p) f = f;
+            if(erand48(X)<p) color /= p;
             else return obj->material.e;
-            //else return obj.material.c;
         if(obj->material.refl==DIFF){
-            double r1=2*PI*erand48(X), r2=erand48(X), r2s=sqrt(r2);
-            V3 w=nl, u=((fabs(w[0])>.1?V3(0,1):V3(1))&w).norm(), v=w&u;
-            V3 d = (u*cos(r1)*r2s + v*sin(r1)*r2s + w*sqrt(1-r2)).norm();
-            return obj->material.e + f.mult(radiance(Ray(x,d),dep,X));
+            double phi = 2 * PI * erand48(X), theta = erand48(X), gamma = sqrt(theta);
+            V3 w=n, u=((fabs(w[0])>.1?V3(0,1):V3(1))&w).norm(), v=w&u;
+            //随机一个方向
+            V3 d = (u * cos(phi) * gamma + v * sin(phi) * gamma + w * sqrt(1 - theta)).norm();
+            return obj->material.e + color.mult(radiance(Ray(x,d),dep,X));
         }
         else{
-            Ray reflray = Ray(x,r.d.reflect(nl));
+            Ray reflray = Ray(x,r.d.reflect(n));
             if (obj->material.refl == SPEC){
-                return obj->material.e + f.mult(radiance(reflray,dep,X)); 
+                return obj->material.e + color.mult(radiance(reflray,dep,X)); 
             }
             else{
-                //V3 d = r.d.refract(n, into?1:obj.ns, into?obj.ns:1); //...
-                V3 d = r.d.refract(nl, res.into?1:obj->material.ns, res.into?obj->material.ns:1); //...
-                if (d.len2()<EPS) // Total internal reflection 
-                    return obj->material.e + f.mult(radiance(reflray, dep,X));
-                //c = 1 - cos(theta(i))
-                //double a=obj.ns-1, b=obj.ns+1, R0=a*a/(b*b), c = 1-(into?-r.d.dot(nl):d.dot(n)); 
-                double a=obj->material.ns-1, b=obj->material.ns+1, R0=a*a/(b*b), c = 1-(res.into?-r.d.dot(nl):-d.dot(nl)); 
-                double Re=R0+(1-R0)*c*c*c*c*c,Tr=1-Re,P=.25+.5*Re,RP=Re/P,TP=Tr/(1-P); 
-                return obj->material.e + f.mult(dep>2 ? (erand48(X)<P ?   // Russian roulette 
+                V3 d = r.d.refract(n, res.into?1:obj->material.ns, res.into?obj->material.ns:1); //...
+                if (d.len2()<EPS) {
+                    //全反射
+                    return obj->material.e + color.mult(radiance(reflray, dep,X));
+                }
+            
+                double a = obj->material.ns - 1;
+                double b = obj->material.ns + 1;
+                double R0 = a * a / (b * b);
+                double c = 1 - (res.into? -r.d.dot(n):-d.dot(n)); 
+                double Re = R0 + (1 - R0) * c * c * c * c * c;
+                double Tr = 1 - Re;
+                double P = 0.25 + 0.5 * Re;
+                double RP = Re / P;
+                double TP = Tr / (1 - P); 
+                return obj->material.e + color.mult(dep>2 ? (erand48(X)<P ? 
                     radiance(reflray,dep,X)*RP:radiance(Ray(x,d),dep,X)*TP) : 
                     radiance(reflray,dep,X)*Re+radiance(Ray(x,d),dep,X)*Tr); 
             }
@@ -292,17 +200,18 @@ public:
 
                     for (int s = 0; s < GOD_RAY_SAMP; ++s) {
                         //物理模拟
-                        Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
+                        //Ray r(p,V3(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1));
                         
-                        /*
+                        
                         //直接求交检查是否可见
                         V3 d(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1);
                         V3 origin = p + d / w;
                         //Ray r(p,scene->lighter->o - p);
-                        Ray r(origin,scene->lighter->o - origin);
-                        */
+                        Ray r(origin,d);
+                        
                         Intersection tmp;
 
+                        
                         if (scene->findNearest_naive(r,tmp)) {
                             if (tmp.id == scene->lighter->id) {
                                 double vlight = e / (p - scene->lighter->o).len2();
@@ -315,8 +224,8 @@ public:
                                 l += vlight / GOD_RAY_SAMP * hg;
                             }
                         }
-                        
-                        //直接求交检查是否可见
+                                                
+                        /*
                         V3 d(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1);
                         V3 origin = p + d / w;
                         r = Ray(p,scene->lighter->o - p);
@@ -332,6 +241,7 @@ public:
                                 l += vlight / GOD_RAY_SAMP * hg;
                             }
                         }
+                        */
  
 
 
@@ -380,37 +290,6 @@ public:
                         */
                         
                     }
-
-                    /*
-                    //使用shadow map检查可见
-                    //计算深度
-                    double depth = (p - scene->lighter->o).len();
-
-                    //坐标转换(theta, fai) = (acos(z), atan(y / x))
-                    if (x == 667 || x == 666) cout << "ray.d.z: " << ray.d.z << "   y/x: " << ray.d.y / ray.d.x << endl;
-                    double theta = acos(ray.d.z);
-                    double fai = atan(ray.d.y / ray.d.x); //??除以0?
-
-                    double real_depth = checkDepth(theta,fai);
-                    if (depth < checkDepth(theta,fai)) {
-                        //可见
-                        double vlight = e / (p - scene->lighter->o).len2();
-                        //HG公式计算系数
-                        double g = 0.5;
-                        double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
-                        double tmp = (1 + g * g - 2 * g * costheta);
-                        double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
-                        //cout << "hg: " << hg << endl;
-                        //l += vlight / 10 * hg;
-                        l += vlight * hg * stepSize;
-                    }
-                    //否则不可见
-
-                    if (x == 667 || x == 666) {
-                        cout << "x: " << x << " depth: " << depth << " real_depth: " << real_depth << endl;
-                        cout <<  "    l: " << l << endl;
-                    }
-                    */
 
                     t += stepSize;
                 }
@@ -493,7 +372,7 @@ public:
 
         double fr = 0.5; //basic
 
-        V3 cx=V3(w*fr/h), cy=(cx&cam.d).norm()* fr, r;
+        V3 cx=V3(w*fr/h), cy=(cx & cam.d).norm()* fr, r;
         //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
 
 
