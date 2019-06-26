@@ -91,7 +91,8 @@ private:
             //cout << "not find" << endl;
             return;
         }
-        //cout << "finded id: " << res.id << endl;
+        if (res.id < 0) return;
+        if (dep++ > 20) return;
 
         Object* obj = scene->getObj(res.id);
         V3 color = obj->material.color(res.a,res.b);
@@ -107,7 +108,6 @@ private:
             //更新附近hitpoint
             Nearest<HitPoint> nh(x,sqrt(PPM_INIT_R2));
             hm->searchHitPoints(nh);
-            //cout << "find hitpoint: " << nh.items.size() << endl;
             //#pragma omp critical
             for (int i = 0;i < nh.items.size(); ++i) {
                 HitPoint* hp = nh.items[i];

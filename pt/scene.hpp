@@ -59,6 +59,7 @@ public:
         */
 
         //pt 景深
+        /*
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
         //objs.push_back(new Sphere(objs.size(),13,V3(70,13,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
@@ -69,8 +70,20 @@ public:
 
         //loader.load("veliero-rotate.obj",objs,V3(20,10,50),REFR);
         loader.load("car.obj",objs,V3(20,0,50),REFR);
+        */
         
-        
+        //pt 景深2        
+        objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
+        objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
+        objs.push_back(new Sphere(objs.size(),15,V3(70,15,50),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
+        objs.push_back(new Sphere(objs.size(),13,V3(30,13,60),       V3(),"marble.bmp", DIFF));//Mirr 
+        objs.push_back(new Sphere(objs.size(),15,V3(60,15,75),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+        lighter =new Sphere(objs.size(),30, V3(40,130.4,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
+        objs.push_back(lighter);
+        objs.push_back(new Cube(objs.size(), V3(-10,0,20),V3(10,10,80),V3(),V3(1,1,1) * 0.5,REFR));
+        objs.push_back(new Sphere(objs.size(),15,V3(0,15 + 10,65),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+
+
 
         //原始       
         /*
