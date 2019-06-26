@@ -61,13 +61,14 @@ public:
         //pt 景深
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
-        objs.push_back(new Sphere(objs.size(),13,V3(70,13,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
+        //objs.push_back(new Sphere(objs.size(),13,V3(70,13,47),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
+        objs.push_back(new Sphere(objs.size(),10,V3(-20,10,60),       V3(),V3(1,1,1)*.999, REFR));//Glas
         lighter =new Sphere(objs.size(),30, V3(40,131.6-.27,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
         objs.push_back(lighter);
         
 
-        loader.load("veliero-rotate.obj",objs,V3(20,10,50),REFR);
-        //loader.load("bunny.obj",objs,V3(20,10,20),REFR);
+        //loader.load("veliero-rotate.obj",objs,V3(20,10,50),REFR);
+        loader.load("car.obj",objs,V3(20,0,50),REFR);
         
         
 
