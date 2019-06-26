@@ -72,7 +72,9 @@ public:
         loader.load("car.obj",objs,V3(20,0,50),REFR);
         */
         
+        
         //pt 景深2        
+        /*
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
         objs.push_back(new Sphere(objs.size(),15,V3(70,15,50),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
@@ -82,6 +84,20 @@ public:
         objs.push_back(lighter);
         objs.push_back(new Cube(objs.size(), V3(-10,0,20),V3(10,10,80),V3(),V3(1,1,1) * 0.5,REFR));
         objs.push_back(new Sphere(objs.size(),15,V3(0,15 + 10,65),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+        */
+
+        //pt
+        objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
+        objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
+        lighter =new Sphere(objs.size(),30, V3(40,130.4,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
+        objs.push_back(lighter);
+        objs.push_back(new Cube(objs.size(), V3(-10,0,20),V3(100,10,100),V3(),V3(1,1,1) * 0.5,REFR));
+        objs.push_back(new Cube(objs.size(), V3(0,0,20),V3(90,20,90),V3(),V3(1,1,1) * 0.5,REFR));
+        objs.push_back(new Sphere(objs.size(),30,V3(60,30 + 10 + 10,75),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),15,V3(60,30 + 10,75),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),10,V3(50,59 + 10,75),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+        objs.push_back(new Sphere(objs.size(),8,V3(80,40 + 10,75),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
+ 
 
 
 
