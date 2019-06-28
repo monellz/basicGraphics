@@ -200,10 +200,9 @@ public:
         //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
 
 
-        //#pragma omp parallel for schedule(dynamic, 1) private(r)
         cout << "samp: " << samp << endl;
         for(int y=0;y<h;++y){
-            fprintf(stderr,"\rUsing %d samp  %5.2f%%  hitpoint %d",samp*4,100.*y/h,hm->getStoreNum());
+            fprintf(stderr,"\ruse %d samp  %5.2f%%  hitpoint %d",samp*4,100.*y/h,hm->getStoreNum());
             for(int x=0;x<w;++x){
                 //cout << "x: " 0<< x << endl;
                 
@@ -249,7 +248,8 @@ public:
                 photontrace(pt,V3(1,1,1),0,X);
             } 
             
-            if (round % 10 == 0) generateIMGInRound(round,"ppm");
+            //if (round % 5 == 0) generateIMGInRound(round,"ppm");
+            generateIMGInRound(round,"ppm");
         }
         //??
         //最终估计
