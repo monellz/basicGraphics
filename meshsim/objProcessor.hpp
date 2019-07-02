@@ -59,7 +59,7 @@ struct ObjProcessor {
             order = s.order;
         }
     };
-    void connectEdgeByLoop(he::Mesh& mesh, std::vector<int3>& face_vert3_map, std::map<int2,int2>& vert2_faces_map, std::map<int2,int>& vert2_edge_map, int init_face_id, const int2& init_order) {
+    void connectEdgeByLoop(he::Mesh& mesh, std::vector<int3>& face_vert3_vec, std::map<int2,int2>& vert2_faces_map, std::map<int2,int>& vert2_edge_map, int init_face_id, const int2& init_order) {
         std::stack<state> stack;
         state start(init_face_id,init_order);
         stack.push(start);
@@ -67,7 +67,7 @@ struct ObjProcessor {
         while (!stack.empty()) {
             /*
             std::cout << "stack size: " << stack.size() << std::endl;
-            std::cout << "f_v3_vec.size: " << face_vert3_map.size() << std::endl;
+            std::cout << "f_v3_vec.size: " << face_vert3_vec.size() << std::endl;
             std::cout << "v2_f_map.size: " << vert2_faces_map.size() << std::endl;
             std::cout << "v2_e_map.size: " << vert2_edge_map.size() << std::endl;
             */
@@ -79,7 +79,7 @@ struct ObjProcessor {
             assert(cur.face_id < mesh.faces.size());
             if (mesh.faces[cur.face_id]->edge != nullptr) continue;
 
-            int3 i3 = face_vert3_map[cur.face_id];
+            int3 i3 = face_vert3_vec[cur.face_id];
             int z;
             if (i3.x != cur.order.x && i3.x != cur.order.y) z = i3.x;
             else if (i3.y != cur.order.x && i3.y != cur.order.y) z = i3.y;
@@ -140,12 +140,11 @@ struct ObjProcessor {
         }
     }
 
-    //void connectEdge(he::Mesh& mesh, std::map<int,int3>& face_vert3_map, std::map<int2,int2> vert2_faces_map, int face_id, const int2& order) {
-    void connectEdge(he::Mesh& mesh, std::vector<int3>& face_vert3_map, std::map<int2,int2>& vert2_faces_map, std::map<int2,int>& vert2_edge_map, int face_id, const int2& order, int depth = 0) {
+    void connectEdge(he::Mesh& mesh, std::vector<int3>& face_vert3_vec, std::map<int2,int2>& vert2_faces_map, std::map<int2,int>& vert2_edge_map, int face_id, const int2& order, int depth = 0) {
         if (mesh.faces[face_id]->edge != nullptr) return;
         std::cout << "depth: " << depth++ << std::endl;
 
-        int3 i3 = face_vert3_map[face_id];
+        int3 i3 = face_vert3_vec[face_id];
         int z;
         if (i3.x != order.x && i3.x != order.y) z = i3.x;
         else if (i3.y != order.x && i3.y != order.y) z = i3.y;
@@ -194,13 +193,13 @@ struct ObjProcessor {
         int2 new_order(z,order.y);
         int2 faces_id = vert2_faces_map[int2(min(z,order.y),max(z,order.y))];
         int new_face_id = faces_id.x == face_id? faces_id.y:faces_id.x;
-        connectEdge(mesh,face_vert3_map,vert2_faces_map,vert2_edge_map,new_face_id,new_order,depth);
+        connectEdge(mesh,face_vert3_vec,vert2_faces_map,vert2_edge_map,new_face_id,new_order,depth);
 
         //e2
         new_order = int2(order.x,z);
         faces_id = vert2_faces_map[int2(min(z,order.x),max(z,order.x))];
         new_face_id = faces_id.x == face_id? faces_id.y:faces_id.x;
-        connectEdge(mesh,face_vert3_map,vert2_faces_map,vert2_edge_map,new_face_id,new_order,depth);
+        connectEdge(mesh,face_vert3_vec,vert2_faces_map,vert2_edge_map,new_face_id,new_order,depth);
     }
 
 
@@ -245,7 +244,7 @@ struct ObjProcessor {
         std::map<int3,int> vert3_face_map;
         std::map<int2,int2> vert2_face2_map;
         std::map<int2,int> vert2_edge_map;
-        std::vector<int3> face_vert3_map;
+        std::vector<int3> face_vert3_vec;
 
         for (int i = 0;i < attrib.vertices.size(); i += 3) {
             he::Vert* v = new he::Vert();
@@ -276,7 +275,7 @@ struct ObjProcessor {
             }
 
             vert3_face_map[int3(vert_index[0],vert_index[1],vert_index[2])] = face->id;
-            face_vert3_map.push_back(int3(vert_index[0],vert_index[1],vert_index[2]));
+            face_vert3_vec.push_back(int3(vert_index[0],vert_index[1],vert_index[2]));
 
             for (int i = 0;i < 3; ++i) {
                 int min_index = min(vert_index[i],vert_index[(i + 1) % 3]);
@@ -306,9 +305,9 @@ struct ObjProcessor {
 
 
 
-        int3 order = face_vert3_map[0];
-        //connectEdge(mesh,face_vert3_map,vert2_face2_map,vert2_edge_map,0,int2(order.x,order.y));
-        connectEdgeByLoop(mesh,face_vert3_map,vert2_face2_map,vert2_edge_map,0,int2(order.x,order.y));
+        int3 order = face_vert3_vec[0];
+        //connectEdge(mesh,face_vert3_vec,vert2_face2_map,vert2_edge_map,0,int2(order.x,order.y));
+        connectEdgeByLoop(mesh,face_vert3_vec,vert2_face2_map,vert2_edge_map,0,int2(order.x,order.y));
 
         //处理pair
         for (int i = 0;i < mesh.edges.size(); ++i) {

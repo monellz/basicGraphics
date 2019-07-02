@@ -24,23 +24,6 @@ struct Material {
         int x = buf[idx + 0], y = buf[idx + 1], z = buf[idx + 2];
         return V3(x,y,z) / 255;
     }
-    V3 color2(double a,double b) {
-        if (buf == nullptr) return c;
-	    double U = ( a - floor( a ) ) * h;
-    	double V = ( b - floor( b ) ) * w;
-    	int U1 = ( int ) floor( U + EPS ) , U2 = U1 + 1;
-    	int V1 = ( int ) floor( V + EPS ) , V2 = V1 + 1;
-    	double rat_U = U2 - U;
-    	double rat_V = V2 - V;
-    	if ( U1 < 0 ) U1 = h - 1; if ( U2 == h ) U2 = 0;
-	    if ( V1 < 0 ) V1 = w - 1; if ( V2 == w ) V2 = 0;
-	    V3 ret;
-	    ret = ret + color(a,b) * rat_U * rat_V;
-	    ret = ret + color(a,b) * rat_U * ( 1 - rat_V );
-	    ret = ret + color(a,b) * ( 1 - rat_U ) * rat_V;
-	    ret = ret + color(a,b) * ( 1 - rat_U ) * ( 1 - rat_V );
-	    return ret;
-    }
 };
 
 

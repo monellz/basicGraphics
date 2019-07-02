@@ -51,6 +51,7 @@ private:
             }
         }
         std::cout << "non-edge pair num: " << non_edge_pair_count << std::endl;
+        std::cout << "total pairs num: " << heap.pairSize() << std::endl;
         
     }
 public:

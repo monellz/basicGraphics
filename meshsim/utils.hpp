@@ -20,12 +20,12 @@
 #define DEFAULT_THRESHOLD 0
 
 template<class T>
-T min(const T& a, const T& b) {
+inline T min(const T& a, const T& b) {
     return a < b? a:b;
 }
 
 template<class T>
-T max(const T& a, const T& b) {
+inline T max(const T& a, const T& b) {
     return a > b? a:b;
 }
 

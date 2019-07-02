@@ -44,6 +44,7 @@ struct Edge {
     }
 };
 
+//判断两个点是否构成边
 inline Edge* is_edge(Vert* v0, Vert* v1) {
     //找到一条v0指向v1的边
     Edge* edge = v0->edge;
@@ -381,7 +382,9 @@ struct Mesh {
 
             //检查三角关系
             //std::cout << "e_down check "<< e_down->id << ", " << e_next->id << ", " << e_next_next->id << std::endl;
+            #ifndef NDEBUG
             checkEdge(e_down);
+            #endif
             //std::cout << "e_down check done" << std::endl;
 
         }
@@ -415,7 +418,9 @@ struct Mesh {
 
             //检查三角关系
             //std::cout << "e_up check "<< e_up->id << ", " << e_next->id << ", " << e_next_next->id << std::endl;
+            #ifndef NDEBUG
             checkEdge(e_up);
+            #endif
             //std::cout << "e_up check done" << std::endl;
         }
 

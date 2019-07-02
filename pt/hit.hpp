@@ -12,7 +12,7 @@ struct HitPoint {
     //brdf
     //pixel position
 
-    V3 color; //颜色?
+    V3 color; //颜色
 
 
     double r2; //当前光子半径平方

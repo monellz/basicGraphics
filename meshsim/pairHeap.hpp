@@ -22,8 +22,11 @@ class PairHeap {
     std::vector<he::Pair> pairs;
     Heap<he::Pair*, cmp> heap;
 public:
-    int size() {
+    int heapSize() {
         return heap.size;
+    }
+    int pairSize() {
+        return pairs.size();
     }
 
     void insert(const he::Pair& p) {
@@ -33,11 +36,12 @@ public:
 
     void iterate(he::Mesh& mesh, int target_face_num) {
         std::cout << "iterate start..." << std::endl;
+        std::cout << "target face num: " << target_face_num << std::endl;
+
         assert(heap.size == 0);
         for (int i = 0;i < pairs.size(); ++i) {
             heap.insert(&pairs[i]);
         }
-        std::cout << "target face num: " << target_face_num << std::endl;
 
         vert2pairMap vert2pair;
         for (int i = 0;i < pairs.size(); ++i) {
@@ -48,8 +52,9 @@ public:
 
         int round = 0;
         while (!heap.empty() && mesh.faceCount > target_face_num) {
-            printf("\rround: %d  face: %d/%lu                      ",round++, mesh.faceCount,mesh.faces.size());
-            //printf("round: %d  face: %d/%lu\n",round++, mesh.faceCount,mesh.faces.size());
+            //printf("\rround: %d  face: %d/%lu                      ",round++, mesh.faceCount,mesh.faces.size());
+            //printf("round: %d  face: %d/%lu\n",round, mesh.faceCount,mesh.faces.size());
+            round++;
 
             //mesh.checkTotal();
             //std::cout << "round first check done" << std::endl;
@@ -74,7 +79,6 @@ public:
  
             } else {
                 //non_edge_part 收缩
-                //边收缩
                 if (!mesh.mergeVert(v0,v1)) continue;
                 //std::cout << "non-edge contraction" << std::endl;
             }
@@ -136,7 +140,7 @@ public:
             //mesh.checkTotal();
             //std::cout << "round third check done" << std::endl;
         }
-        printf("\niterator done..\n");
+        printf("\niterator done.. total round: %d\n",round);
 
     }
     

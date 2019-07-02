@@ -5,7 +5,6 @@
 #include "utils.hpp"
 #include "ray.hpp"
 #include "scene.hpp"
-#include "camera.hpp"
 #include "tracer.hpp"
 using namespace std;
 
@@ -49,9 +48,9 @@ private:
         if(++dep > 5)
             if(erand48(X)<p) color /= p;
             else return obj->material.e;
-        if(obj->material.refl==DIFF){
+        if(obj->material.refl == DIFF){
             double phi = 2 * PI * erand48(X), theta = erand48(X), gamma = sqrt(theta);
-            V3 w=n, u=((fabs(w[0])>.1?V3(0,1):V3(1))&w).norm(), v=w&u;
+            V3 w = n, u = ((fabs(w[0]) > EPS? V3(0,1):V3(1)) & w).norm(), v = w & u;
             //随机一个方向
             V3 d = (u * cos(phi) * gamma + v * sin(phi) * gamma + w * sqrt(1 - theta)).norm();
             return obj->material.e + color.mult(radiance(Ray(x,d),dep,X));
@@ -91,16 +90,13 @@ public:
 
 
     void rendering() override {
-        Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
-        //Ray cam(V3(70,32,180), V3(-0.15,0.05,-1).norm()); 
-        //Ray cam(V3(-170,6,80), V3(2.55,0.05,-1).norm()); 
-        //Ray cam(V3(70,32,280), V3(-0.6,0.05,-1).norm()); 
+        Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); 
 
-        double fr = 0.5; //basic
+        double fr = 0.5;
 
-        V3 cx=V3(w*fr/h), cy=(cx&cam.d).norm()* fr, r; //basic
-        //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
-
+        V3 cx = V3(w * fr / h);
+        V3 cy = (cx & cam.d).norm() * fr; 
+        V3 r;
 
         //渐进式 无景深
         /*
@@ -125,7 +121,7 @@ public:
 
         #pragma omp parallel for schedule(dynamic, 1) private(r)
         for (int y = 0; y < h; ++y) {
-            fprintf(stderr,"\rpath tracing  use %d samp  %5.2f%%",samp*4,100.*y/h);
+            fprintf(stderr,"\rpath tracing  use %d samp  %5.2f%%",samp * 4,100.0 * y / h);
             for (int x = 0;x < w; ++x) {
                 for (int sy = 0; sy < 2; ++sy) {
                     for (int sx = 0; sx < 2; ++sx) {
@@ -136,11 +132,7 @@ public:
                         for (int s = 0;s < samp; ++s) {
                             double r1 = 2 * erand48(X), dx = r1 < 1? sqrt(r1): 2 - sqrt(2 - r1);
                             double r2 = 2 * erand48(X), dy = r2 < 1? sqrt(r2): 2 - sqrt(2 - r2);
-                            V3 d = cx * ((sx + dx / 2 + x) / w - 0.5) + cy * ((sy + dy / 2 + y) / h - 0.5) + cam.d; //basic
-                            //V3 d = cx * ((sx + dx / 2 + x) / w ) + cy * ((sy + dy / 2 + y) / h - 0.5) + cam.d;
-                            //V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
-                            //r+=radiance(Ray(cam.o+d*120,d.norm()),0,X);
-                            //r += radiance(Ray(cam.o + d * 120, d.norm()), 0, X);
+                            V3 d = cx * ((sx + dx / 2 + x) / w - 0.5) + cy * ((sy + dy / 2 + y) / h - 0.5) + cam.d;
                             r += radiance(Ray(cam.o + d * 110, d.norm()), 0, X);
 
                         }
@@ -225,70 +217,6 @@ public:
                             }
                         }
                                                 
-                        /*
-                        V3 d(2 * erand48(X) - 1,2 * erand48(X) - 1,2 * erand48(X) - 1);
-                        V3 origin = p + d / w;
-                        r = Ray(p,scene->lighter->o - p);
-                        if (scene->findNearest_naive(r,tmp)) {
-                            if (tmp.id == scene->lighter->id) {
-                                double vlight = (50000) / (p - scene->lighter->o).len2();
-                                //HG公式计算系数
-                                double g = 0.5;
-                                double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
-                                double tmp = (1 + g * g - 2 * g * costheta);
-                                double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
-                                //cout << "hg: " << hg << endl;
-                                l += vlight / GOD_RAY_SAMP * hg;
-                            }
-                        }
-                        */
- 
-
-
-                        //使用radiance计算
-                        /*
-                        Ray r(p,scene->lighter->o - p);
-                        V3 radi = radiance(r,0,X,2);
-                        if (radi.len2() > EPS) {
-                            double vlight = e / (p - scene->lighter->o).len2();
-                            //HG公式计算系数
-                            double g = 0.5;
-                            double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
-                            double tmp = (1 + g * g - 2 * g * costheta);
-                            double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
-                            //cout << "hg: " << hg << endl;
-                            l += vlight / 10 * hg;
-                        }
-                        
-                        */
-
-                        /*
-                        //使用shadow map检查可见
-                        //计算深度
-                        if (erand48(X) > 1.0 / 10) continue;
-                        double depth = (p - scene->lighter->o).len();
-
-                        //坐标转换(theta, fai) = (acos(z), atan(y / x))
-                        double theta = acos(ray.d.z);
-                        double fai = atan(ray.d.y / ray.d.x); //??除以0?
-
-                        //double real_depth = checkDepth(theta,fai);
-                        //cout << "depth: " << depth << " real_depth: " << real_depth << endl;
-                        if (depth < checkDepth(theta,fai)) {
-                            //可见
-                            double vlight = e / (p - scene->lighter->o).len2();
-                            //HG公式计算系数
-                            double g = 0.5;
-                            double costheta = (-ray.d).norm().dot((scene->lighter->o - p).norm());
-                            double tmp = (1 + g * g - 2 * g * costheta);
-                            double hg = (1 - g * g) / (4 * PI * pow(tmp,1.5));
-                            //cout << "hg: " << hg << endl;
-                            //l += vlight / 10 * hg;
-                            l += vlight / 10 * hg * stepSize;
-                        }
-                        //否则不可见
-                        */
-                        
                     }
 
                     t += stepSize;
@@ -317,43 +245,41 @@ private:
         Object* obj = scene->getObj(res.id);
         //cout << "id: " << res.id << endl;
 
-        V3 x=r.pos(res.t),nl = res.n,f=obj->material.color(res.a,res.b);
-        //n 球心到交点
-        //nl 入射光对应法向量
+        V3 x = r.pos(res.t), n = res.n, color = obj->material.color(res.a,res.b);
 
-        double p=f.max();
-        if(++dep> 5)
-            if(erand48(X)<p) f/=p;
-            //if(erand48(X)<p) f = f;
-            //else return obj->material.e;
+        double p = color.max();
+        if(++dep > 5)
+            if(erand48(X) < p) color /= p;
             else return obj->material.e;
-        if(obj->material.refl==DIFF){
+        if (dep > 25) return V3();
+        if(obj->material.refl == DIFF){
             //cout << "into diff" << endl;
             int photon_num = 0;
-            V3 tmp =  pm.irradEstimate(x,f,PM_R,photon_num) * p;
-            //V3 tmp =  pm.irradEstimate(x,f,5,photon_num) * p;
-            //tmp.print();
+            //估计
+            V3 tmp =  pm.irradEstimate(x,color,PM_R,photon_num) * p;
             return obj->material.e + tmp;
-            //return pm.irradEstimate(x,res.n,f,5,100000);
-
         }
         else{
-            Ray reflray = Ray(x,r.d.reflect(nl));
+            Ray reflray = Ray(x,r.d.reflect(n));
             if (obj->material.refl == SPEC){
-                return obj->material.e + f.mult(pm_radiance(reflray, pm, dep, X)); 
+                return obj->material.e + color.mult(pm_radiance(reflray, pm, dep, X)); 
             }
             else{
-                //V3 d = r.d.refract(n, into?1:obj.ns, into?obj.ns:1); //...
-                V3 d = r.d.refract(nl, res.into?1:obj->material.ns, res.into?obj->material.ns:1); //...
-                if (d.len2()<EPS) // Total internal reflection 
-                    return obj->material.e + f.mult(pm_radiance(reflray,pm, dep,X));
-                //c = 1 - cos(theta(i))
-                //double a=obj.ns-1, b=obj.ns+1, R0=a*a/(b*b), c = 1-(into?-r.d.dot(nl):d.dot(n)); 
-                double a=obj->material.ns-1, b=obj->material.ns+1, R0=a*a/(b*b), c = 1-(res.into?-r.d.dot(nl):-d.dot(nl)); 
-                double Re=R0+(1-R0)*c*c*c*c*c,Tr=1-Re,P=.25+.5*Re,RP=Re/P,TP=Tr/(1-P); 
-                return obj->material.e + f.mult(dep>2 ? (erand48(X)<P ?   // Russian roulette 
+                V3 d = r.d.refract(n, res.into?1:obj->material.ns, res.into?obj->material.ns:1); //...
+                if (d.len2()<EPS) //全反射
+                    return obj->material.e + color.mult(pm_radiance(reflray,pm, dep,X));
+                double a = obj->material.ns - 1;
+                double b = obj->material.ns + 1;
+                double R0 = a * a / (b * b);
+                double c = 1 - (res.into? -r.d.dot(n):-d.dot(n)); 
+                double Re = R0 + (1 - R0) * c * c * c * c * c;
+                double Tr = 1 - Re;
+                double P = 0.25 + 0.5 * Re;
+                double RP = Re / P;
+                double TP = Tr / (1 - P); 
+                return obj->material.e + color.mult(dep>2 ? (erand48(X)<P ? 
                     pm_radiance(reflray,pm,dep,X)*RP:pm_radiance(Ray(x,d),pm,dep,X)*TP) : 
-                    pm_radiance(reflray,pm,dep,X)*Re+pm_radiance(Ray(x,d),pm,dep,X)*Tr); 
+                    pm_radiance(reflray,pm,dep,X)*Re + pm_radiance(Ray(x,d),pm,dep,X)*Tr); 
             }
         }
     }
@@ -367,19 +293,17 @@ public:
         pmtracer.run();
         cout << "run done" << endl;
         Ray cam(V3(70,32,280), V3(-0.15,0.05,-1).norm()); //basic
-        //Ray cam(V3(-5,32,280), V3(0.15,-0.05,-1).norm()); 
-        //Ray cam(V3(-5,50,280), V3(0.15,-0.15,-1).norm()); 
 
         double fr = 0.5; //basic
 
-        V3 cx=V3(w*fr/h), cy=(cx & cam.d).norm()* fr, r;
-        //Camera cam(w,h,V3(70,32,280),V3(-0.15,0.05,-1).norm());
+        V3 cx = V3(w * fr / h);
+        V3 cy = (cx & cam.d).norm() * fr, r;
 
 
         #pragma omp parallel for schedule(dynamic, 1) private(r)
-        for(int y=0;y<h;++y){
-            fprintf(stderr,"\rpm rendering %d samp  %5.2f%%",samp*4,100.*y/h);
-            for(int x=0;x<w;++x){
+        for(int y = 0; y < h; ++y){
+            fprintf(stderr,"\rpm rendering %d samp  %5.2f%%",samp * 4,100.0 * y / h);
+            for(int x = 0;x < w;++x){
                 
                 //有明显锯齿
                 /*
@@ -390,20 +314,19 @@ public:
                 */
                 
                
-                for(int sy=0;sy<2;++sy)
-                    for(int sx=0;sx<2;++sx)
+                for(int sy = 0;sy < 2;++sy)
+                    for(int sx = 0;sx < 2;++sx)
                     {
-                        unsigned short X[3]={y+sx,y*x+sy,y*x*y+sx*sy};
+                        unsigned short X[3]={y + sx,y * x + sy,y * x * y + sx * sy};
                         //basic
                         r[0]=r[1]=r[2]=0;
-                        for(int s=0;s<samp;++s){
-                            double r1=2*erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
-                            double r2=2*erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
-                            V3 d=cx*((sx+dx/2+x)/w-.5)+cy*((sy+dy/2+y)/h-.5)+cam.d; 
-                            //r+=radiance(Ray(cam.o+d*120,d.norm()),0,X); //basic
-                            r+=pm_radiance(Ray(cam.o+d*120,d.norm()),pm,0,X); 
+                        for(int s = 0;s < samp; ++s){
+                            double r1 = 2 * erand48(X), dx=r1<1 ? sqrt(r1): 2-sqrt(2-r1);
+                            double r2 = 2 * erand48(X), dy=r2<1 ? sqrt(r2): 2-sqrt(2-r2);
+                            V3 d = cx * ((sx + dx / 2 + x) / w - 0.5) + cy * ((sy + dy / 2 + y) / h - 0.5) + cam.d; 
+                            r += pm_radiance(Ray(cam.o + d * 120,d.norm()),pm,0,X); 
                         }
-                        img[y*w+x]+=(r/samp).clamp()/4;
+                        img[y*w+x] += (r / samp).clamp() / 4;
                     }
                 
             }

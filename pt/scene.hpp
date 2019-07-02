@@ -77,7 +77,7 @@ public:
         /*
         objs.push_back(new Plane(objs.size(),V3(0,0,1),-1,V3(),V3(.25,.25,.75),DIFF));  //Back
         objs.push_back(new Plane(objs.size(), V3(0,1,0),0,V3(), "floor.bmp", DIFF));
-        objs.push_back(new Sphere(objs.size(),15,V3(70,15,50),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
+        objs.pusfasheh_back(new Sphere(objs.size(),15,V3(70,15,50),       V3(),V3(1,1,1)*.999, SPEC));//Mirr 
         objs.push_back(new Sphere(objs.size(),13,V3(30,13,60),       V3(),"marble.bmp", DIFF));//Mirr 
         objs.push_back(new Sphere(objs.size(),15,V3(60,15,75),       V3(), V3(1,1,1) * 0.999, REFR));//Glas 
         lighter =new Sphere(objs.size(),30, V3(40,130.4,81.6),V3(12,12,12),  V3(), DIFF); //Lite 
@@ -151,40 +151,6 @@ public:
         tree = new kdTree(objs);
         std::cout << "build tree done" << std::endl;
     }
-
-    void readObj(std::string fn, const V3& bias, Refl_t refl) {
-        //读取obj文件并放入objs中
-        std::cout << "reading obj..." << std::endl;
-        ifstream ifs(fn);
-        std::vector<V3> buf;
-        std::string s;
-        while (getline(ifs,s)) {
-            if (s.length() < 2) continue;
-            //std::cout << s << std::endl;
-            if (s[0] == 'v') {
-                //点
-                double x,y,z;
-                std::string type;
-                istringstream in(s);
-                in >> type >> x >> y >> z;
-                //buf.push_back(V3(x + 30,y + 30,z + 20));
-                //buf.push_back(V3(x,y,z) + V3(31,0,60)); //Al
-                buf.push_back(V3(x,y,z) + bias);
-            } else if (s[0] == 'f') {
-                //面
-                int i,j,k;
-                istringstream in(s);
-                std::string type;
-                in >> type >> i >> j >> k;
-                //objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(.25,.25,.25), DIFF));        
-                objs.push_back(new Triangle(objs.size(),buf[i - 1],buf[j - 1],buf[k - 1],(buf[i - 1] - buf[j - 1]) & (buf[j - 1] - buf[k - 1]), V3(),V3(1,1,1)*0.5, DIFF));        
-            } else {
-                //std::cout << s << endl;
-            }
-        }
-        std::cout << "read done ..." << std::endl;
-    }
-
 
     bool findNearest_naive(const Ray& r, Intersection& res) {
         /*

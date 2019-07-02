@@ -42,7 +42,7 @@ const double _maxpos = 1000;
 
 
 //景深效果  限pt
-#define DEPTH
+//#define DEPTH
 #define FOCAL_RAD 5  //景深随机圆盘取点半径
 #define FOCAL_DIS 75 
 

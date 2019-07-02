@@ -52,7 +52,6 @@ public:
         V3 minpos(_minpos,_minpos,_minpos);
         V3 maxpos(_maxpos,_maxpos,_maxpos);
         return std::make_pair(minpos,maxpos);
-        //todo!!
     }
 };
 

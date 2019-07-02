@@ -60,14 +60,13 @@ private:
 
         const int axis = node->axis;
         const double delta = np.pos[axis] - node->item->pos[axis]; //距离
-        const V3 dir = node->item->pos - np.pos; //查找点指向当前光子
-        const double dist2 = dir.len2(); //当前光子距查找点的距离平方
-        //const double dt = // ??
+        const V3 dir = node->item->pos - np.pos; //查找点指向当前xx
+        const double dist2 = dir.len2(); //当前xx距查找点的距离平方
 
         np.insert(node->item);
 
         if (delta > 0) {
-            //在查找点左边，找光子的右孩子即可
+            //在查找点左边，找xx的右孩子即可
             _search(np,node->rc);
             //搜左边
             if (delta * delta < np.rad2) _search(np,node->lc);
